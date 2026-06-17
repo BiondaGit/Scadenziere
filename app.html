@@ -301,11 +301,16 @@
           <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
         </div>
         <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
-        <div class="fgrp"><label>Email aggiuntiva 1</label><input id="mEmail1" type="email" placeholder="opzionale" list="dlEmail" /></div>
-        <div class="fgrp"><label>Email aggiuntiva 2</label><input id="mEmail2" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" type="email" placeholder="opzionale" list="dlEmail" /></div>
         <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
       </div>
-      <div class="cell-muted" style="margin-top:10px"><strong>Nota:</strong> Le email aggiuntive sono destinatari facoltativi oltre all'email del gruppo.</div>
+      <div class="cell-muted" style="margin-top:10px">
+        <strong>Nota:</strong> Email gruppo e email utente vengono aggiunte automaticamente. Le email extra sono destinatari aggiuntivi facoltativi.
+      </div>
     </div>
     <div class="modalFoot"><button class="btn" id="modalCancel">Annulla</button><button class="btn primary" id="modalConfirm">Conferma</button></div>
   </div>
@@ -377,14 +382,15 @@ async function carica() {
   setLoading(false);
   if (error) { showToast('Errore','Impossibile caricare le scadenze.'); return; }
   all=(data||[]).map(r=>{
+    // Estrai solo le email extra (tipo='extra') — gruppo e utente sono automatici
     const dest=r.scadenze_destinatari||[];
-    const email1=dest.find(d=>d.tipo==='utente')?.email||'';
-    const email2=dest.filter(d=>d.tipo==='extra')[0]?.email||'';
+    const extras=dest.filter(d=>d.tipo==='extra').map(d=>d.email);
     const row={
-      id:r.id,categoria:r.categoria||'',sottoCategoria:r.sotto_categoria||'',
-      descrizione:r.descrizione||'',scadenzaISO:r.scadenza||'',scadenzaIT:isoToIt(r.scadenza),
-      preavviso:r.preavviso_giorni??0,ricorrenza:r.ricorrenza||'NESSUNA',
-      ogniX:r.ogni_x||'',rinnovoAuto:r.rinnovo_auto===true,note:r.note||'',email1,email2,
+      id:r.id, categoria:r.categoria||'', sottoCategoria:r.sotto_categoria||'',
+      descrizione:r.descrizione||'', scadenzaISO:r.scadenza||'', scadenzaIT:isoToIt(r.scadenza),
+      preavviso:r.preavviso_giorni??0, ricorrenza:r.ricorrenza||'NESSUNA',
+      ogniX:r.ogni_x||'', rinnovoAuto:r.rinnovo_auto===true, note:r.note||'',
+      emails: extras, // array di email extra
     };
     row.status=computeStatus(row); return row;
   });
@@ -400,8 +406,13 @@ function computeStatus(row){
   if(diff<0)return'overdue'; if(diff<=Number(row.preavviso??0))return'due'; return'ok';
 }
 function isPastDate(iso){ if(!iso)return false; const d=new Date(iso+'T00:00:00'); const t=new Date(); t.setHours(0,0,0,0); return d<t; }
+
 function calcolaProssimaScadenza(iso,ricorrenza,ogniX){
-  const d=new Date(iso+'T00:00:00'); const r=String(ricorrenza||'NESSUNA').toUpperCase(); const x=Number(ogniX)||1;
+  // iso è sempre in formato YYYY-MM-DD
+  const parts=iso.split('-');
+  const d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+  const r=String(ricorrenza||'NESSUNA').toUpperCase();
+  const x=Number(ogniX)||1;
   if(r==='NESSUNA')return iso;
   if(r==='GIORNALIERA'){d.setDate(d.getDate()+1);}
   else if(r==='X_GIORNI'){d.setDate(d.getDate()+x);}
@@ -410,7 +421,10 @@ function calcolaProssimaScadenza(iso,ricorrenza,ogniX){
   else if(r==='MENSILE'){addMesiSafe(d,1);}
   else if(r==='X_MESI'){addMesiSafe(d,x);}
   else if(r==='ANNUALE'){addMesiSafe(d,12);}
-  return d.toISOString().split('T')[0];
+  const yy=d.getFullYear();
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return`${yy}-${mm}-${dd}`;
 }
 function addMesiSafe(d,mesi){ const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+mesi); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); }
 function render(){
@@ -465,7 +479,7 @@ function applyFilters(){
       if(entroUnit==='days')limit.setDate(limit.getDate()+entroVal);
       if(entroUnit==='months')limit.setMonth(limit.getMonth()+entroVal);
       if(entroUnit==='years')limit.setFullYear(limit.getFullYear()+entroVal);
-      const d=new Date(r.scadenzaISO+'T00:00:00');
+      const d=new Date(row.scadenzaISO+'T00:00:00');
       if(d<now||d>limit)return false;
     }
     return true;
@@ -497,16 +511,18 @@ function clearActiveRow(){document.querySelectorAll('tr.row-active,tr.row-active
 function setRowActionClass(action){const tr=document.querySelector('tr.row-active');if(!tr)return;tr.classList.remove('row-active-edit','row-active-delete');if(action==='edit')tr.classList.add('row-active-edit');if(action==='delete')tr.classList.add('row-active-delete');}
 function openModal(){const b=document.getElementById('modalBackdrop');b.style.display='flex';b.setAttribute('aria-hidden','false');}
 function closeModal(){const b=document.getElementById('modalBackdrop');b.style.display='none';b.setAttribute('aria-hidden','true');clearActiveRow();}
+
 function openCreate(){
   mode='create';originalEdit=null;
   document.getElementById('modalTitle').textContent='Nuova scadenza';
-  ['mCategoria','mSottoCategoria','mDescrizione','mScadenza','mNote','mEmail1','mEmail2'].forEach(id=>{document.getElementById(id).value='';});
+  ['mCategoria','mSottoCategoria','mDescrizione','mScadenza','mNote','mEmail1','mEmail2','mEmail3','mEmail4','mEmail5'].forEach(id=>{document.getElementById(id).value='';});
   document.getElementById('mRicorrenza').value='NESSUNA';
   document.getElementById('mPreavviso').value='0';
   document.getElementById('mRinnovoAuto').checked=false;
   document.getElementById('mOgniX').value='';
   toggleOgniX();openModal();
 }
+
 function openEdit(){
   if(!selectedId)return;const row=all.find(r=>String(r.id)===String(selectedId));if(!row)return;
   mode='edit';document.getElementById('modalTitle').textContent='Modifica scadenza';
@@ -518,11 +534,14 @@ function openEdit(){
   document.getElementById('mOgniX').value=row.ogniX||'';
   document.getElementById('mPreavviso').value=row.preavviso??0;
   document.getElementById('mNote').value=row.note;
-  document.getElementById('mEmail1').value=row.email1;
-  document.getElementById('mEmail2').value=row.email2;
+  // Carica le email extra (max 5)
+  for(let i=1;i<=5;i++){
+    document.getElementById(`mEmail${i}`).value=row.emails[i-1]||'';
+  }
   document.getElementById('mRinnovoAuto').checked=row.rinnovoAuto;
   originalEdit={...row};toggleOgniX();setActiveRow(selectedId);setRowActionClass('edit');openModal();
 }
+
 function toggleOgniX(){
   const val=document.getElementById('mRicorrenza').value;
   const isX=['X_GIORNI','X_SETTIMANE','X_MESI'].includes(val);
@@ -538,11 +557,18 @@ function toggleOgniX(){
   const prev=document.getElementById('mPreavviso');
   if(val==='GIORNALIERA'){prev.value=0;prev.readOnly=true;prev.style.opacity='0.45';}else{prev.readOnly=false;prev.style.opacity='';}
 }
+
 async function confirmModal(){
   const descrizione=document.getElementById('mDescrizione').value.trim();
   const categoria=document.getElementById('mCategoria').value.trim();
   const scadenza=document.getElementById('mScadenza').value;
   if(!descrizione||!categoria||!scadenza){showToast('Dati mancanti','Categoria, descrizione e scadenza sono obbligatorie.');return;}
+  // Raccoglie le 5 email extra
+  const emailsExtra=[];
+  for(let i=1;i<=5;i++){
+    const v=document.getElementById(`mEmail${i}`).value.trim();
+    if(v)emailsExtra.push(v);
+  }
   const dati={
     categoria,sotto_categoria:document.getElementById('mSottoCategoria').value.trim(),
     descrizione,scadenza,preavviso_giorni:Number(document.getElementById('mPreavviso').value||0),
@@ -550,13 +576,13 @@ async function confirmModal(){
     ogni_x:document.getElementById('mOgniX').value?Number(document.getElementById('mOgniX').value):null,
     rinnovo_auto:document.getElementById('mRinnovoAuto').checked,
     note:document.getElementById('mNote').value.trim(),
-    email1:document.getElementById('mEmail1').value.trim(),
-    email2:document.getElementById('mEmail2').value.trim(),
+    emailsExtra,
   };
   const dateChanged=mode==='create'||(originalEdit&&dati.scadenza!==originalEdit.scadenzaISO);
   if(dateChanged&&isPastDate(dati.scadenza)){openPastDateConfirm('La data di scadenza inserita è già passata. Vuoi procedere comunque?',()=>doSalva(dati));return;}
   doSalva(dati);
 }
+
 async function doSalva(dati){
   document.getElementById('modalConfirm').disabled=true;
   const payload={
@@ -574,17 +600,28 @@ async function doSalva(dati){
     const{error}=await db.from('scadenze').update(payload).eq('id',selectedId);
     if(error){showToast('Errore',error.message);document.getElementById('modalConfirm').disabled=false;return;}
     idScadenza=selectedId;
-    await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza).in('tipo',['utente','extra']);
+    await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza);
   }
-  const destinatari=[{id_scadenza:idScadenza,email:utenteCorrente.email,tipo:'utente'}];
-  if(dati.email1&&dati.email1!==utenteCorrente.email&&dati.email1!==gruppoCorrente.email_gruppo)destinatari.push({id_scadenza:idScadenza,email:dati.email1,tipo:'extra'});
-  if(dati.email2&&dati.email2!==utenteCorrente.email&&dati.email2!==gruppoCorrente.email_gruppo)destinatari.push({id_scadenza:idScadenza,email:dati.email2,tipo:'extra'});
+  // Destinatari: gruppo (sempre) + utente (sempre, se diverso da gruppo) + extra
+  const emailGruppo=gruppoCorrente.email_gruppo;
+  const emailUtente=utenteCorrente.email;
+  const destinatari=[];
+  destinatari.push({id_scadenza:idScadenza,email:emailGruppo,tipo:'gruppo'});
+  if(emailUtente!==emailGruppo){
+    destinatari.push({id_scadenza:idScadenza,email:emailUtente,tipo:'utente'});
+  }
+  // Email extra — deduplicazione rispetto a gruppo e utente
+  const giàPresenti=new Set([emailGruppo,emailUtente]);
+  dati.emailsExtra.forEach(em=>{
+    if(em&&!giàPresenti.has(em)){destinatari.push({id_scadenza:idScadenza,email:em,tipo:'extra'});giàPresenti.add(em);}
+  });
   await db.from('scadenze_destinatari').insert(destinatari);
   document.getElementById('modalConfirm').disabled=false;
   closeModal();
   showToast(mode==='create'?'Salvato':'Aggiornato',mode==='create'?'Nuova scadenza inserita.':'Modifica salvata.');
   await carica();
 }
+
 function openDeleteConfirm(){
   if(!selectedId)return;const row=all.find(r=>String(r.id)===String(selectedId));if(!row)return;
   document.getElementById('confirmText').innerHTML=`
@@ -599,6 +636,7 @@ function openDeleteConfirm(){
   document.getElementById('confirmBackdrop').style.display='flex';
 }
 function closeConfirm(){document.getElementById('confirmBackdrop').style.display='none';clearActiveRow();}
+
 async function doDelete(){
   document.getElementById('confirmOk').disabled=true;const idToRemove=selectedId;
   const{error}=await db.from('scadenze').update({eliminato:true,eliminato_il:new Date().toISOString()}).eq('id',idToRemove);
@@ -606,6 +644,7 @@ async function doDelete(){
   if(error){showToast('Errore',error.message);return;}
   showToast('Eliminato','Evento eliminato logicamente.');clearSelection();await carica();
 }
+
 function openRenew(id){
   renewId=id;const row=all.find(r=>String(r.id)===String(id));if(!row)return;
   setActiveRow(id);
@@ -618,6 +657,7 @@ function openRenew(id){
   document.getElementById('renewBackdrop').style.display='flex';
 }
 function closeRenewModal(){document.getElementById('renewBackdrop').style.display='none';clearActiveRow();}
+
 async function confirmRenew(){
   const nuovaScadenza=document.getElementById('rScadenza').value;const note=document.getElementById('rNote').value;
   if(!nuovaScadenza){showToast('Dati mancanti','Inserisci la nuova scadenza.');return;}
@@ -627,13 +667,15 @@ async function confirmRenew(){
   if(error){showToast('Errore',error.message);return;}
   closeRenewModal();showToast('Rinnovato','Scadenza aggiornata.');await carica();
 }
+
 function openPastDateConfirm(msg,fn){_pastDateContinue=fn;document.getElementById('pastDateText').textContent=msg;document.getElementById('pastDateBackdrop').style.display='flex';}
 function closePastDateConfirm(){document.getElementById('pastDateBackdrop').style.display='none';}
+
 function popolaAutocomplete(){
   const categorie=[...new Set(all.map(r=>r.categoria).filter(Boolean))].sort();
   const sottoCat=[...new Set(all.map(r=>r.sottoCategoria).filter(Boolean))].sort();
   const descrizioni=[...new Set(all.map(r=>r.descrizione).filter(Boolean))].sort();
-  const emails=[...new Set([...all.map(r=>r.email1),...all.map(r=>r.email2)].filter(Boolean))].sort();
+  const emails=[...new Set(all.flatMap(r=>r.emails).filter(Boolean))].sort();
   fillDatalist('dlCategoria',categorie);fillDatalist('dlSottoCategoria',sottoCat);
   fillDatalist('dlDescrizione',descrizioni);fillDatalist('dlEmail',emails);
   const fCat=document.getElementById('fCategoria');const curVal=fCat.value;
@@ -720,10 +762,14 @@ function wireUiOnce(){
       const ricLabel=ricLabelMap[ric]||'';
       const ricBlock=(ric!=='NESSUNA'&&ricLabel)?`<div class="kv"><div class="k">Ricorrenza</div><div class="v">${escapeHtml(ricLabel)}</div></div>`:'';
       const autoBlock=rowObj.rinnovoAuto?`<div class="kv"><div class="k">Rinnovo</div><div class="v"><span class="pill" style="background:rgba(124,240,194,.15);color:#7cf0c2;border:1px solid rgba(124,240,194,.3)">🔄 Automatico</span></div></div>`:'';
+      // Mostra solo email extra nel dettaglio
+      const emailsBlock=rowObj.emails.length>0
+        ?rowObj.emails.map((em,i)=>`<div class="kv"><div class="k">Email extra ${i+1}</div><div class="v">${escapeHtml(em)}</div></div>`).join('')
+        :'';
       const details=document.createElement('tr');details.className='details-row';details.dataset.detailsFor=String(rowId);
       const td=document.createElement('td');td.colSpan=7;
       const box=document.createElement('div');box.className='details';
-      box.innerHTML=`<div class="detailsGrid">${ricBlock}${autoBlock}<div class="kv"><div class="k">Note</div><div class="v">${escapeHtml(rowObj.note||'—')}</div></div><div class="kv"><div class="k">Email 1</div><div class="v">${escapeHtml(rowObj.email1||'—')}</div></div><div class="kv"><div class="k">Email 2</div><div class="v">${escapeHtml(rowObj.email2||'—')}</div></div></div>`;
+      box.innerHTML=`<div class="detailsGrid">${ricBlock}${autoBlock}<div class="kv"><div class="k">Note</div><div class="v">${escapeHtml(rowObj.note||'—')}</div></div>${emailsBlock}</div>`;
       td.appendChild(box);details.appendChild(td);tr.after(details);
       details.style.display='table-row';box.style.display='block';btn.textContent='− Chiudi';
     }
