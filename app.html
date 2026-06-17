@@ -582,10 +582,10 @@ async function confirmModal(){
     if(nessuna){showToast('Nessuna modifica','Non sono state apportate modifiche.');closeModal();return;}
   }
   // Raccoglie le 5 email extra
-  const emailsExtra=[];
+  const emailsExtra2=[];
   for(let i=1;i<=5;i++){
     const v=document.getElementById(`mEmail${i}`).value.trim();
-    if(v)emailsExtra.push(v);
+    if(v)emailsExtra2.push(v);
   }
   const dati={
     categoria,sotto_categoria:document.getElementById('mSottoCategoria').value.trim(),
@@ -594,7 +594,7 @@ async function confirmModal(){
     ogni_x:document.getElementById('mOgniX').value?Number(document.getElementById('mOgniX').value):null,
     rinnovo_auto:document.getElementById('mRinnovoAuto').checked,
     note:document.getElementById('mNote').value.trim(),
-    emailsExtra,
+    emailsExtra:emailsExtra2,
   };
   const dateChanged=mode==='create'||(originalEdit&&dati.scadenza!==originalEdit.scadenzaISO);
   if(dateChanged&&isPastDate(dati.scadenza)){openPastDateConfirm('La data di scadenza inserita è già passata. Vuoi procedere comunque?',()=>doSalva(dati));return;}
