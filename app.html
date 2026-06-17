@@ -1,0 +1,756 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    span.s1 {font: 12.0px 'Lucida Grande'}
+    span.s2 {font: 12.0px Menlo}
+    span.s3 {font: 12.0px 'Apple Color Emoji'}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="it"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Scadenziere&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="theme-color" content="#0B0F14"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="apple-mobile-web-app-title" content="Scadenziere"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>:root{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--bg:#0b1020;--panel:#0f1733;--card:#121c3d;--text:#e8ecff;--muted:#aab2d5;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--line:rgba(255,255,255,.09);--accent:#6ea8ff;--accent2:#7cf0c2;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--danger:#ff6b6b;--warning:#ffd166;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--shadow:0 12px 28px rgba(0,0,0,.35);--radius:16px;--radius2:22px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>*{box-sizing:border-box}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin:0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:radial-gradient(1200px 700px at 20% 0%,rgba(110,168,255,.18),transparent 60%),</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>radial-gradient(900px 600px at 90% 10%,rgba(124,240,194,.16),transparent 55%),</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>var(--bg);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color:var(--text);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.wrap{max-width:1200px;margin:0 auto;padding:22px 18px 34px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.topbar{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display:flex;gap:12px;align-items:center;justify-content:space-between;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding:18px;border:1px solid var(--line);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius:var(--radius2);box-shadow:var(--shadow);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>position:sticky;top:10px;z-index:5;backdrop-filter:blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.brand{display:flex;gap:12px;align-items:center}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.logo{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width:42px;height:42px;border-radius:14px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:radial-gradient(circle at 30% 30%,rgba(110,168,255,.95),rgba(124,240,194,.85));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow:0 10px 20px rgba(0,0,0,.35);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>h1{font-size:18px;margin:0;line-height:1.1}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.sub{font-size:12px;color:var(--muted);margin-top:2px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>appearance:none;border:1px solid var(--line);color:var(--text);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:rgba(255,255,255,.04);padding:10px 12px;border-radius:14px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor:pointer;display:inline-flex;align-items:center;gap:10px;font-size:14px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transition:transform .08s ease,background .15s ease,border-color .15s ease,opacity .15s ease;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>user-select:none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn:active{transform:translateY(1px)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn.primary{background:rgba(110,168,255,.18);border-color:rgba(110,168,255,.35)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn.primary:hover{background:rgba(110,168,255,.24)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn.danger{background:rgba(255,107,107,.16);border-color:rgba(255,107,107,.35)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn.danger:hover{background:rgba(255,107,107,.22)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn.ghost{background:transparent}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.icon{width:18px;height:18px;display:inline-block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.25))}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.controls{margin-top:16px;display:grid;grid-template-columns:1fr 180px 160px;gap:12px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding:10px 12px;display:flex;gap:10px;align-items:center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field input,.field select{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.field input::placeholder{color:rgba(232,236,255,.45)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.chip{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size:12px;color:var(--muted);border:1px solid var(--line);padding:7px 10px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius:999px;background:rgba(255,255,255,.02);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display:inline-flex;gap:8px;align-items:center;justify-content:center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#filtriPopover{position:absolute;top:52px;right:0;width:min(520px,calc(100vw - 36px));z-index:30}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.filtersCard{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);border-radius:18px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:linear-gradient(180deg,rgba(18,28,61,.98),rgba(15,23,51,.98));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow:var(--shadow);padding:12px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.filtersGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.fgrp{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.03)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.fgrp label{display:block;font-size:11px;color:rgba(232,236,255,.62);text-transform:uppercase;letter-spacing:.05em}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.fgrp input,.fgrp select,.fgrp textarea{margin-top:6px;width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.fgrp textarea{min-height:84px;resize:vertical}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modalFoot{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top:14px;border:1px solid var(--line);border-radius:var(--radius2);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow:var(--shadow);overflow:hidden;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>table{width:100%;border-collapse:collapse}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>thead th{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color:rgba(232,236,255,.70);padding:14px;border-bottom:1px solid var(--line);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:rgba(0,0,0,.12);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:15px;line-height:1.2}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody tr:not(.row-overdue):not(.row-due):not(.row-active):hover{background:rgba(255,255,255,.03)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.cell-muted{color:var(--muted);font-size:13px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.descTitle,.descSub{margin:0;padding:0}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody tr.row-overdue&gt;td{background:rgba(160,60,60,.22)!important}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody tr.row-due&gt;td{background:rgba(170,130,60,.18)!important}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody tr.row-overdue&gt;td:first-child,tbody tr.row-due&gt;td:first-child{border-top-left-radius:14px;border-bottom-left-radius:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody tr.row-overdue&gt;td:last-child,tbody tr.row-due&gt;td:last-child{border-top-right-radius:14px;border-bottom-right-radius:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.row-active td{outline:2px solid rgba(255,255,255,.18);outline-offset:-2px;background:rgba(255,255,255,.03)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.row-active-edit td{outline:2px solid rgba(110,168,255,.35);outline-offset:-2px;background:rgba(110,168,255,.06)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.row-active-delete td{outline:2px solid rgba(255,107,107,.35);outline-offset:-2px;background:rgba(255,107,107,.08)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.details-row td{padding:0;border-bottom:0}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,.10)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.pill.danger{background:rgba(255,107,107,.20);color:#ffd6d6}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.pill.warn{background:rgba(255,180,84,.22);color:#ffe0b3}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.moreBtn{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius:12px;padding:8px 10px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-size:13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.renewBtn{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius:12px;padding:8px 10px;cursor:pointer;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:13px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.renewBtn:hover,.moreBtn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.details{display:none;padding:12px 14px 14px;background:rgba(0,0,0,.10);border-bottom:1px solid var(--line)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.detailsGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.kv{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.02)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.k{font-size:11px;color:rgba(232,236,255,.62);text-transform:uppercase;letter-spacing:.05em}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.v{margin-top:4px;font-size:14px;color:rgba(232,236,255,.92);word-break:break-word}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>th.sortable{cursor:pointer;user-select:none;touch-action:manipulation}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>th.sortable .sort-indicator{display:inline-block;width:1em;text-align:center;opacity:.75;font-size:12px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modal{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:linear-gradient(180deg,rgba(18,28,61,.99),rgba(11,16,32,.99));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);border-radius:var(--radius2);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width:min(640px,100%);max-height:calc(100vh - 32px);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display:flex;flex-direction:column;box-shadow:var(--shadow);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modalHead{padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modalHead h2{margin:0;font-size:17px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.modalBody{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.x{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:13px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.x:hover{background:rgba(255,255,255,.07)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.toast{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>position:fixed;right:18px;bottom:18px;padding:12px 14px;border-radius:16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border:1px solid var(--line);background:rgba(15,23,51,.95);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow:var(--shadow);display:none;max-width:min(520px,calc(100% - 36px));z-index:60</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.toast .tTitle{font-weight:700;font-size:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.toast .tMsg{margin-top:4px;color:var(--muted);font-size:13px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.loading{opacity:.6;pointer-events:none}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.rememberRow{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.92);font-weight:600;font-size:14px}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>#pastDateBackdrop{z-index:9999!important}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media(max-width:860px){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.controls{grid-template-columns:1fr}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.actions{justify-content:flex-start}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#filtriPopover{left:0;right:auto}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.filtersGrid{grid-template-columns:1fr}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media(max-width:1020px){.detailsGrid{grid-template-columns:1fr 1fr}}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media(max-width:720px){.formGrid{grid-template-columns:1fr}}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media(max-width:900px),(pointer:coarse){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>body{font-size:16px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>button,.btn{font-size:16px;padding:14px 16px;border-radius:14px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>input,select,textarea{font-size:16px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.card{overflow-x:auto;-webkit-overflow-scrolling:touch}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>table{min-width:520px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>thead th{font-size:11px;padding:12px 8px;white-space:nowrap}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>tbody td{font-size:15px;padding:10px 8px;line-height:1.35}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.moreBtn{display:block!important;width:100%!important;padding:13px 4px!important;text-align:center!important;border-radius:10px!important;font-size:13px!important;margin-bottom:5px!important}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.renewBtn{display:block!important;width:100%!important;padding:13px 4px!important;text-align:center!important;border-radius:10px!important;font-size:13px!important}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.toast{right:12px;left:12px;bottom:12px;max-width:none;border-radius:14px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>#filtriPopover{left:0;right:0;top:50px;width:100%}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.filtersGrid{grid-template-columns:1fr}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.backdrop{padding:12px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.modal{border-radius:18px;max-height:calc(100vh - 24px)}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.modalBody{padding:14px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.modalHead{padding:14px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.modalFoot{padding:12px 14px;gap:8px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.modalFoot .btn{flex:1;justify-content:center;min-height:48px!important;font-size:16px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.formGrid{grid-template-columns:1fr}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.fgrp{padding:12px 14px;border-radius:14px}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.detailsGrid{grid-template-columns:1fr}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1">&lt;div class="wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="topbar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="brand"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="logo" aria-hidden="true"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;&lt;h1&gt;Scadenziere&lt;/h1&gt;&lt;div class="sub" id="nomeGruppo"&gt;—&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="actions"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn primary" id="btnInserisci"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M12 5v14M5 12h14"/&gt;&lt;/svg&gt;Inserisci</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn" id="btnModifica" disabled&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M12 20h9"/&gt;&lt;path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/&gt;&lt;/svg&gt;Modifica</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn danger" id="btnElimina" disabled&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M3 6h18"/&gt;&lt;path d="M8 6V4h8v2"/&gt;&lt;path d="M19 6l-1 14H6L5 6"/&gt;&lt;path d="M10 11v6"/&gt;&lt;path d="M14 11v6"/&gt;&lt;/svg&gt;Elimina</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn ghost" id="btnAggiorna" title="Ricarica elenco"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M21 12a9 9 0 1 1-3-6.7"/&gt;&lt;path d="M21 3v7h-7"/&gt;&lt;/svg&gt;Aggiorna</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn" id="btnEsci"&gt;Esci&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="controls"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="field"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"&gt;&lt;path d="M21 21l-4.3-4.3"/&gt;&lt;path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="q" placeholder="Cerca per descrizione, categoria o sotto-categoria…" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="field" style="position:relative;padding:0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn" id="btnFiltri" type="button" style="width:100%;justify-content:center;border:0;background:transparent"&gt;Filtri&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="filtriPopover" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="filtersCard"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="filtersGrid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="fgrp"&gt;&lt;label&gt;Categoria&lt;/label&gt;&lt;select id="fCategoria"&gt;&lt;option value=""&gt;Tutte&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="fgrp"&gt;&lt;label&gt;Sotto categoria&lt;/label&gt;&lt;select id="fSottoCategoria"&gt;&lt;option value=""&gt;Tutte&lt;/option&gt;&lt;/select&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="fgrp"&gt;&lt;label&gt;Data da&lt;/label&gt;&lt;input id="fDataDa" type="date" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="fgrp"&gt;&lt;label&gt;Data a&lt;/label&gt;&lt;input id="fDataA" type="date" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="fgrp" style="margin-top:10px"&gt;&lt;label&gt;Stato&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;select id="fStato"&gt;&lt;option value=""&gt;Tutti&lt;/option&gt;&lt;option value="overdue"&gt;Solo scadute&lt;/option&gt;&lt;option value="due"&gt;Solo in scadenza&lt;/option&gt;&lt;option value="ok"&gt;Solo ok&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="fgrp" style="margin-top:10px"&gt;&lt;label&gt;Ricorrenza&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;select id="fRicorrenza"&gt;&lt;option value=""&gt;Tutte&lt;/option&gt;&lt;option value="only"&gt;Solo ricorrenti&lt;/option&gt;&lt;option value="no"&gt;Solo non ricorrenti&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="fgrp" style="margin-top:10px"&gt;&lt;label&gt;Entro&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;gap:8px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;input id="fEntroVal" type="number" min="0" step="1" placeholder="Es. 7" style="flex:1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;select id="fEntroUnit" style="width:120px"&gt;&lt;option value="days"&gt;Giorni&lt;/option&gt;&lt;option value="months"&gt;Mesi&lt;/option&gt;&lt;option value="years"&gt;Anni&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="fgrp" style="margin-top:10px"&gt;&lt;label&gt;Ordina per&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;select id="fSort"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="priority"&gt;Priorità&lt;/option&gt;&lt;option value="dateAsc"&gt;Data <span class="s1">↑</span>&lt;/option&gt;&lt;option value="dateDesc"&gt;Data <span class="s1">↓</span>&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="cat"&gt;Categoria <span class="s1">↑</span>&lt;/option&gt;&lt;option value="catDesc"&gt;Categoria <span class="s1">↓</span>&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="descAsc"&gt;Descrizione <span class="s1">↑</span>&lt;/option&gt;&lt;option value="descDesc"&gt;Descrizione <span class="s1">↓</span>&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;option value="prevAsc"&gt;Preavviso <span class="s1">↑</span>&lt;/option&gt;&lt;option value="prevDesc"&gt;Preavviso <span class="s1">↓</span>&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="modalFoot" style="padding:10px 0 0;border-top:0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn" id="btnResetFiltri" type="button"&gt;Reset&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn primary" id="btnApplicaFiltri" type="button"&gt;Applica&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="chip" id="count"&gt;0 eventi&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card" id="tableCard"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th style="width:44px"&gt;Sel&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th id="thDescrizione" class="sortable"&gt;Descrizione &lt;span class="sort-indicator"&gt;&lt;/span&gt;&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th style="width:160px" id="thCategoria" class="sortable"&gt;Categoria &lt;span class="sort-indicator"&gt;&lt;/span&gt;&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th style="width:170px" id="thScadenza" class="sortable"&gt;Scadenza &lt;span class="sort-indicator"&gt;&lt;/span&gt;&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th style="width:150px" id="thPreavviso" class="sortable"&gt;Preavviso &lt;span class="sort-indicator"&gt;&lt;/span&gt;&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th&gt;Stato&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;th style="width:90px"&gt;Dettagli&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;tbody id="tbody"&gt;&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- MODAL: data nel passato --&gt;</p>
+<p class="p1">&lt;div class="backdrop" id="pastDateBackdrop" role="dialog" aria-modal="true" aria-hidden="true"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal" style="width:min(560px,100%)"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalHead"&gt;&lt;h2&gt;Conferma&lt;/h2&gt;&lt;button class="x" id="pastDateClose"&gt;Chiudi&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalBody"&gt;&lt;div class="cell-muted" id="pastDateText"&gt;La data di scadenza inserita è già passata. Vuoi procedere comunque?&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalFoot"&gt;&lt;button class="btn" id="pastDateCancel"&gt;Annulla&lt;/button&gt;&lt;button class="btn primary" id="pastDateOk"&gt;Procedi&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- MODAL: Inserisci / Modifica --&gt;</p>
+<p class="p1">&lt;div class="backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalHead"&gt;&lt;h2 id="modalTitle"&gt;Nuova scadenza&lt;/h2&gt;&lt;button class="x" id="modalClose"&gt;Chiudi&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalBody"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="formGrid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Categoria *&lt;/label&gt;&lt;input id="mCategoria" placeholder="Es. Auto" list="dlCategoria" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Sotto categoria&lt;/label&gt;&lt;input id="mSottoCategoria" placeholder="Es. Assicurazione" list="dlSottoCategoria" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Descrizione *&lt;/label&gt;&lt;input id="mDescrizione" placeholder="Es. Panda DY524CX" list="dlDescrizione" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Scadenza *&lt;/label&gt;&lt;input id="mScadenza" type="date" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Ricorrenza&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;select id="mRicorrenza"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="NESSUNA"&gt;Nessuna&lt;/option&gt;&lt;option value="GIORNALIERA"&gt;Giornaliera&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="X_GIORNI"&gt;Ogni X giorni&lt;/option&gt;&lt;option value="SETTIMANALE"&gt;Settimanale&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="X_SETTIMANE"&gt;Ogni X settimane&lt;/option&gt;&lt;option value="MENSILE"&gt;Mensile&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="X_MESI"&gt;Ogni X mesi&lt;/option&gt;&lt;option value="ANNUALE"&gt;Annuale&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp" id="grpOgniX" style="display:none"&gt;&lt;label id="lblOgniX"&gt;Ogni X mesi&lt;/label&gt;&lt;input id="mOgniX" type="number" min="2" step="1" placeholder="Es. 3" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp" id="grpRinnovoAuto" style="display:none"&gt;&lt;label&gt;Rinnovo automatico&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="rememberRow"&gt;&lt;input id="mRinnovoAuto" type="checkbox" /&gt;&lt;label for="mRinnovoAuto"&gt;Rinnova automaticamente alla scadenza&lt;/label&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Preavviso (giorni)&lt;/label&gt;&lt;input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Email aggiuntiva 1&lt;/label&gt;&lt;input id="mEmail1" type="email" placeholder="opzionale" list="dlEmail" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Email aggiuntiva 2&lt;/label&gt;&lt;input id="mEmail2" type="email" placeholder="opzionale" list="dlEmail" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp" style="grid-column:1/-1"&gt;&lt;label&gt;Note&lt;/label&gt;&lt;textarea id="mNote" placeholder="opzionale"&gt;&lt;/textarea&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted" style="margin-top:10px"&gt;&lt;strong&gt;Nota:&lt;/strong&gt; Le email aggiuntive sono destinatari facoltativi oltre all'email del gruppo.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalFoot"&gt;&lt;button class="btn" id="modalCancel"&gt;Annulla&lt;/button&gt;&lt;button class="btn primary" id="modalConfirm"&gt;Conferma&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- MODAL: Elimina --&gt;</p>
+<p class="p1">&lt;div class="backdrop" id="confirmBackdrop" role="dialog" aria-modal="true" aria-hidden="true"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal" style="width:min(560px,100%)"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalHead"&gt;&lt;h2&gt;Conferma eliminazione&lt;/h2&gt;&lt;button class="x" id="confirmClose"&gt;Chiudi&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalBody"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="confirmText" class="cell-muted"&gt;Stai per eliminare l'evento selezionato.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted" style="margin-top:10px"&gt;Per procedere, conferma con il pulsante qui sotto.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalFoot"&gt;&lt;button class="btn" id="confirmCancel"&gt;Annulla&lt;/button&gt;&lt;button class="btn danger" id="confirmOk"&gt;Sì, elimina&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- MODAL: Rinnova --&gt;</p>
+<p class="p1">&lt;div class="backdrop" id="renewBackdrop" role="dialog" aria-modal="true" aria-hidden="true"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal" style="width:min(620px,100%)"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalHead"&gt;&lt;h2&gt;Rinnova&lt;/h2&gt;&lt;button class="x" id="renewClose"&gt;Chiudi&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalBody"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="formGrid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Nuova scadenza *&lt;/label&gt;&lt;input id="rScadenza" type="date" /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Scadenza attuale&lt;/label&gt;&lt;input id="rOldScadenza" type="text" readonly /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp"&gt;&lt;label&gt;Regola&lt;/label&gt;&lt;input id="rRule" type="text" readonly /&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="fgrp" style="grid-column:1/-1"&gt;&lt;label&gt;Note (sostituzione)&lt;/label&gt;&lt;textarea id="rNote" placeholder="Inserisci le note aggiornate…"&gt;&lt;/textarea&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted" style="margin-top:10px"&gt;&lt;strong&gt;Nota:&lt;/strong&gt; Il rinnovo mantiene lo stesso ID e aggiorna solo Scadenza e Note.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modalFoot"&gt;&lt;button class="btn" id="renewCancel"&gt;Annulla&lt;/button&gt;&lt;button class="btn primary" id="renewOk"&gt;Conferma rinnovo&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="toast" id="toast"&gt;&lt;div class="tTitle" id="toastTitle"&gt;Ok&lt;/div&gt;&lt;div class="tMsg" id="toastMsg"&gt;Operazione completata.&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;datalist id="dlCategoria"&gt;&lt;/datalist&gt;</p>
+<p class="p1">&lt;datalist id="dlSottoCategoria"&gt;&lt;/datalist&gt;</p>
+<p class="p1">&lt;datalist id="dlDescrizione"&gt;&lt;/datalist&gt;</p>
+<p class="p1">&lt;datalist id="dlEmail"&gt;&lt;/datalist&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">const SUPABASE_URL<span class="Apple-converted-space">  </span>= 'https://wmjncvwjocmdfftughtz.supabase.co';</p>
+<p class="p1">const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';</p>
+<p class="p1">const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);</p>
+<p class="p2"><br></p>
+<p class="p1">let all=[], view=[], selectedId=null, mode='create', renewId=null;</p>
+<p class="p1">let activeRowId=null, originalEdit=null, _pastDateContinue=null;</p>
+<p class="p1">let utenteCorrente=null, gruppoCorrente=null;</p>
+<p class="p2"><br></p>
+<p class="p1">async function avvia() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const { data:{ session } } = await db.auth.getSession();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!session) { window.location.href='index.html'; return; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const { data:utente, error } = await db.from('utenti').select('*,gruppi(*)').eq('id',session.user.id).single();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (error||!utente) { showToast('Errore','Profilo utente non trovato.'); return; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>utenteCorrente=utente; gruppoCorrente=utente.gruppi;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('nomeGruppo').textContent=gruppoCorrente?.nome||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>await db.from('utenti').update({ultimo_accesso:new Date().toISOString()}).eq('id',session.user.id);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>await carica(); wireUiOnce();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">async function carica() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setLoading(true);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const { data, error } = await db</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.from('scadenze')</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.select('id,categoria,sotto_categoria,descrizione,scadenza,preavviso_giorni,ricorrenza,ogni_x,rinnovo_auto,note,eliminato,scadenze_destinatari(email,tipo)')</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.eq('eliminato',false)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.order('scadenza',{ascending:true});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setLoading(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (error) { showToast('Errore','Impossibile caricare le scadenze.'); return; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>all=(data||[]).map(r=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const dest=r.scadenze_destinatari||[];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const email1=dest.find(d=&gt;d.tipo==='utente')?.email||'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const email2=dest.filter(d=&gt;d.tipo==='extra')[0]?.email||'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const row={</p>
+<p class="p1"><span class="Apple-converted-space">      </span>id:r.id,categoria:r.categoria||'',sottoCategoria:r.sotto_categoria||'',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>descrizione:r.descrizione||'',scadenzaISO:r.scadenza||'',scadenzaIT:isoToIt(r.scadenza),</p>
+<p class="p1"><span class="Apple-converted-space">      </span>preavviso:r.preavviso_giorni??0,ricorrenza:r.ricorrenza||'NESSUNA',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ogniX:r.ogni_x||'',rinnovoAuto:r.rinnovo_auto===true,note:r.note||'',email1,email2,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">    </span>row.status=computeStatus(row); return row;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>popolaAutocomplete(); applyFilters();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function isoToIt(iso){ if(!iso)return''; const[y,m,d]=iso.split('-'); return`${d}/${m}/${y}`; }</p>
+<p class="p1">function computeStatus(row){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!row.scadenzaISO)return'ok';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d=new Date(row.scadenzaISO+'T00:00:00'); if(isNaN(d))return'ok';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const today=new Date(); today.setHours(0,0,0,0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const diff=Math.floor((d-today)/86400000);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(diff&lt;0)return'overdue'; if(diff&lt;=Number(row.preavviso??0))return'due'; return'ok';</p>
+<p class="p1">}</p>
+<p class="p1">function isPastDate(iso){ if(!iso)return false; const d=new Date(iso+'T00:00:00'); const t=new Date(); t.setHours(0,0,0,0); return d&lt;t; }</p>
+<p class="p1">function calcolaProssimaScadenza(iso,ricorrenza,ogniX){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const d=new Date(iso+'T00:00:00'); const r=String(ricorrenza||'NESSUNA').toUpperCase(); const x=Number(ogniX)||1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(r==='NESSUNA')return iso;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(r==='GIORNALIERA'){d.setDate(d.getDate()+1);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='X_GIORNI'){d.setDate(d.getDate()+x);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='SETTIMANALE'){d.setDate(d.getDate()+7);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='X_SETTIMANE'){d.setDate(d.getDate()+x*7);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='MENSILE'){addMesiSafe(d,1);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='X_MESI'){addMesiSafe(d,x);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(r==='ANNUALE'){addMesiSafe(d,12);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return d.toISOString().split('T')[0];</p>
+<p class="p1">}</p>
+<p class="p1">function addMesiSafe(d,mesi){ const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+mesi); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); }</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">function render(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tbody=document.getElementById('tbody'); tbody.innerHTML=''; const frag=document.createDocumentFragment();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>view.forEach(row=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tr=document.createElement('tr'); tr.dataset.rowid=String(row.id);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdSel=document.createElement('td'); const cb=document.createElement('input'); cb.type='checkbox'; cb.name='selRow'; cb.value=row.id; tdSel.appendChild(cb);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdDesc=document.createElement('td'); tdDesc.innerHTML=`&lt;div class="descTitle"&gt;${escapeHtml(row.descrizione)}&lt;/div&gt;${row.sottoCategoria?`&lt;div class="descSub cell-muted"&gt;${escapeHtml(row.sottoCategoria)}&lt;/div&gt;`:''}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdCat=document.createElement('td'); tdCat.innerHTML=`&lt;div&gt;${escapeHtml(row.categoria)}&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdScad=document.createElement('td'); tdScad.innerHTML=`&lt;div&gt;${escapeHtml(row.scadenzaIT)}&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdPrev=document.createElement('td'); tdPrev.innerHTML=`&lt;div&gt;${row.preavviso??0} &lt;span class="cell-muted"&gt;giorni&lt;/span&gt;&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdStato=document.createElement('td');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(row.status==='overdue')tdStato.innerHTML='&lt;span class="pill danger"&gt;Scaduta&lt;/span&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>else if(row.status==='due')tdStato.innerHTML='&lt;span class="pill warn"&gt;In scadenza&lt;/span&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>else tdStato.innerHTML='&lt;span class="cell-muted"&gt;—&lt;/span&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tdMore=document.createElement('td');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const ric=String(row.ricorrenza||'NESSUNA').toUpperCase();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(ric!=='NESSUNA'){const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='<span class="s2">↻</span>';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const btn=document.createElement('button');btn.className='moreBtn';btn.textContent='+ Info';btn.dataset.action='toggleInfo';btn.dataset.rowid=String(row.id);tdMore.appendChild(btn);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.append(tdSel,tdDesc,tdCat,tdScad,tdPrev,tdStato,tdMore);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.classList.toggle('row-overdue',row.status==='overdue');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.classList.toggle('row-due',row.status==='due');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>frag.appendChild(tr);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tbody.appendChild(frag);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('count').textContent=`${view.length} eventi`;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function applyFilters(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const q=(document.getElementById('q')?.value||'').trim().toLowerCase();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cat=(document.getElementById('fCategoria')?.value||'').trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sub=(document.getElementById('fSottoCategoria')?.value||'').trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const da=document.getElementById('fDataDa')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const a=document.getElementById('fDataA')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const stato=document.getElementById('fStato')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const fRic=document.getElementById('fRicorrenza')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const entroVal=Number(document.getElementById('fEntroVal')?.value||0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const entroUnit=document.getElementById('fEntroUnit')?.value||'days';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sortMode=document.getElementById('fSort')?.value||'priority';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>view=all.filter(r=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(cat&amp;&amp;r.categoria!==cat)return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(sub&amp;&amp;r.sottoCategoria!==sub)return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(da&amp;&amp;(!r.scadenzaISO||r.scadenzaISO&lt;da))return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(a&amp;&amp;(!r.scadenzaISO||r.scadenzaISO&gt;a))return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(stato&amp;&amp;r.status!==stato)return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(fRic==='only'&amp;&amp;String(r.ricorrenza||'NESSUNA').toUpperCase()==='NESSUNA')return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(fRic==='no'&amp;&amp;String(r.ricorrenza||'NESSUNA').toUpperCase()!=='NESSUNA')return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(q){const hay=`${r.descrizione} ${r.categoria} ${r.sottoCategoria}`.toLowerCase();if(!hay.includes(q))return false;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(Number.isFinite(entroVal)&amp;&amp;entroVal&gt;0){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(!r.scadenzaISO)return false;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const now=new Date();now.setHours(0,0,0,0);const limit=new Date(now);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(entroUnit==='days')limit.setDate(limit.getDate()+entroVal);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(entroUnit==='months')limit.setMonth(limit.getMonth()+entroVal);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(entroUnit==='years')limit.setFullYear(limit.getFullYear()+entroVal);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const d=new Date(r.scadenzaISO+'T00:00:00');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(d&lt;now||d&gt;limit)return false;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pr={overdue:0,due:1,ok:2};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(sortMode==='priority'){view.sort((a,b)=&gt;{const pa=pr[a.status]??9,pb=pr[b.status]??9;if(pa!==pb)return pa-pb;return(a.scadenzaISO||'').localeCompare(b.scadenzaISO||'');});}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='dateAsc'){view.sort((a,b)=&gt;(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='dateDesc'){view.sort((a,b)=&gt;(b.scadenzaISO||'').localeCompare(a.scadenzaISO||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='cat'){view.sort((a,b)=&gt;(a.categoria||'').localeCompare(b.categoria||'')||(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='catDesc'){view.sort((a,b)=&gt;(b.categoria||'').localeCompare(a.categoria||'')||(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='descAsc'){view.sort((a,b)=&gt;(a.descrizione||'').localeCompare(b.descrizione||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='descDesc'){view.sort((a,b)=&gt;(b.descrizione||'').localeCompare(a.descrizione||''));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='prevAsc'){view.sort((a,b)=&gt;(Number(a.preavviso)||0)-(Number(b.preavviso)||0));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>else if(sortMode==='prevDesc'){view.sort((a,b)=&gt;(Number(b.preavviso)||0)-(Number(a.preavviso)||0));}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>clearSelection(); render(); updateHeaderIndicators();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function updateHeaderIndicators(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('th.sortable .sort-indicator').forEach(s=&gt;s.textContent='');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const s=document.getElementById('fSort')?.value||'priority';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const map={dateAsc:['thScadenza','<span class="s1">↑</span>'],dateDesc:['thScadenza','<span class="s1">↓</span>'],cat:['thCategoria','<span class="s1">↑</span>'],catDesc:['thCategoria','<span class="s1">↓</span>'],descAsc:['thDescrizione','<span class="s1">↑</span>'],descDesc:['thDescrizione','<span class="s1">↓</span>'],prevAsc:['thPreavviso','<span class="s1">↑</span>'],prevDesc:['thPreavviso','<span class="s1">↓</span>']};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(map[s]){const el=document.getElementById(map[s][0])?.querySelector('.sort-indicator');if(el)el.textContent=map[s][1];}</p>
+<p class="p1">}</p>
+<p class="p1">function cycleSortTh(thId,asc,desc){const fSort=document.getElementById('fSort');const cur=fSort?.value||'priority';if(cur!==asc&amp;&amp;cur!==desc)fSort.value=desc;else if(cur===desc)fSort.value=asc;else fSort.value='priority';applyFilters();}</p>
+<p class="p1">function setSelection(id){selectedId=id;document.getElementById('btnModifica').disabled=false;document.getElementById('btnElimina').disabled=false;}</p>
+<p class="p1">function clearSelection(){selectedId=null;document.querySelectorAll('input[name="selRow"]').forEach(cb=&gt;cb.checked=false);document.getElementById('btnModifica').disabled=true;document.getElementById('btnElimina').disabled=true;}</p>
+<p class="p1">function setActiveRow(id){clearActiveRow();activeRowId=id;const cb=document.querySelector(`input[name="selRow"][value="${CSS.escape(String(id))}"]`);if(cb?.closest('tr'))cb.closest('tr').classList.add('row-active');}</p>
+<p class="p1">function clearActiveRow(){document.querySelectorAll('tr.row-active,tr.row-active-edit,tr.row-active-delete').forEach(tr=&gt;tr.classList.remove('row-active','row-active-edit','row-active-delete'));activeRowId=null;}</p>
+<p class="p1">function setRowActionClass(action){const tr=document.querySelector('tr.row-active');if(!tr)return;tr.classList.remove('row-active-edit','row-active-delete');if(action==='edit')tr.classList.add('row-active-edit');if(action==='delete')tr.classList.add('row-active-delete');}</p>
+<p class="p1">function openModal(){const b=document.getElementById('modalBackdrop');b.style.display='flex';b.setAttribute('aria-hidden','false');}</p>
+<p class="p1">function closeModal(){const b=document.getElementById('modalBackdrop');b.style.display='none';b.setAttribute('aria-hidden','true');clearActiveRow();}</p>
+<p class="p1">function openCreate(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>mode='create';originalEdit=null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalTitle').textContent='Nuova scadenza';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>['mCategoria','mSottoCategoria','mDescrizione','mScadenza','mNote','mEmail1','mEmail2'].forEach(id=&gt;{document.getElementById(id).value='';});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mRicorrenza').value='NESSUNA';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mPreavviso').value='0';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mRinnovoAuto').checked=false;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mOgniX').value='';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>toggleOgniX();openModal();</p>
+<p class="p1">}</p>
+<p class="p1">function openEdit(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!selectedId)return;const row=all.find(r=&gt;String(r.id)===String(selectedId));if(!row)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>mode='edit';document.getElementById('modalTitle').textContent='Modifica scadenza';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mCategoria').value=row.categoria;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mSottoCategoria').value=row.sottoCategoria;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mDescrizione').value=row.descrizione;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mScadenza').value=row.scadenzaISO;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mRicorrenza').value=row.ricorrenza;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mOgniX').value=row.ogniX||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mPreavviso').value=row.preavviso??0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mNote').value=row.note;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mEmail1').value=row.email1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mEmail2').value=row.email2;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mRinnovoAuto').checked=row.rinnovoAuto;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>originalEdit={...row};toggleOgniX();setActiveRow(selectedId);setRowActionClass('edit');openModal();</p>
+<p class="p1">}</p>
+<p class="p1">function toggleOgniX(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const val=document.getElementById('mRicorrenza').value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const isX=['X_GIORNI','X_SETTIMANE','X_MESI'].includes(val);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const hasR=val!=='NESSUNA';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('grpOgniX').style.display=isX?'block':'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!isX)document.getElementById('mOgniX').value='';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const lbl=document.getElementById('lblOgniX');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(lbl){if(val==='X_GIORNI')lbl.textContent='Ogni X giorni';else if(val==='X_SETTIMANE')lbl.textContent='Ogni X settimane';else lbl.textContent='Ogni X mesi';}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const canAuto=hasR&amp;&amp;!['NESSUNA','GIORNALIERA','X_GIORNI'].includes(val);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('grpRinnovoAuto').style.display=canAuto?'block':'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cb=document.getElementById('mRinnovoAuto');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(val==='GIORNALIERA'){cb.checked=true;}else if(!canAuto){cb.checked=false;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const prev=document.getElementById('mPreavviso');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(val==='GIORNALIERA'){prev.value=0;prev.readOnly=true;prev.style.opacity='0.45';}else{prev.readOnly=false;prev.style.opacity='';}</p>
+<p class="p1">}</p>
+<p class="p1">async function confirmModal(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const descrizione=document.getElementById('mDescrizione').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const categoria=document.getElementById('mCategoria').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const scadenza=document.getElementById('mScadenza').value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!descrizione||!categoria||!scadenza){showToast('Dati mancanti','Categoria, descrizione e scadenza sono obbligatorie.');return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dati={</p>
+<p class="p1"><span class="Apple-converted-space">    </span>categoria,sotto_categoria:document.getElementById('mSottoCategoria').value.trim(),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>descrizione,scadenza,preavviso_giorni:Number(document.getElementById('mPreavviso').value||0),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>ricorrenza:document.getElementById('mRicorrenza').value,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>ogni_x:document.getElementById('mOgniX').value?Number(document.getElementById('mOgniX').value):null,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>rinnovo_auto:document.getElementById('mRinnovoAuto').checked,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>note:document.getElementById('mNote').value.trim(),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>email1:document.getElementById('mEmail1').value.trim(),</p>
+<p class="p1"><span class="Apple-converted-space">    </span>email2:document.getElementById('mEmail2').value.trim(),</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dateChanged=mode==='create'||(originalEdit&amp;&amp;dati.scadenza!==originalEdit.scadenzaISO);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(dateChanged&amp;&amp;isPastDate(dati.scadenza)){openPastDateConfirm('La data di scadenza inserita è già passata. Vuoi procedere comunque?',()=&gt;doSalva(dati));return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>doSalva(dati);</p>
+<p class="p1">}</p>
+<p class="p1">async function doSalva(dati){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalConfirm').disabled=true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const payload={</p>
+<p class="p1"><span class="Apple-converted-space">    </span>id_gruppo:gruppoCorrente.id,id_utente:utenteCorrente.id,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>categoria:dati.categoria,sotto_categoria:dati.sotto_categoria,descrizione:dati.descrizione,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>scadenza:dati.scadenza,preavviso_giorni:dati.preavviso_giorni,ricorrenza:dati.ricorrenza,</p>
+<p class="p1"><span class="Apple-converted-space">    </span>ogni_x:dati.ogni_x,rinnovo_auto:dati.rinnovo_auto,note:dati.note,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let idScadenza;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(mode==='create'){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const{data,error}=await db.from('scadenze').insert(payload).select('id').single();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(error){showToast('Errore',error.message);document.getElementById('modalConfirm').disabled=false;return;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>idScadenza=data.id;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}else{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const{error}=await db.from('scadenze').update(payload).eq('id',selectedId);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(error){showToast('Errore',error.message);document.getElementById('modalConfirm').disabled=false;return;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>idScadenza=selectedId;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza).in('tipo',['utente','extra']);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const destinatari=[{id_scadenza:idScadenza,email:utenteCorrente.email,tipo:'utente'}];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(dati.email1&amp;&amp;dati.email1!==utenteCorrente.email&amp;&amp;dati.email1!==gruppoCorrente.email_gruppo)destinatari.push({id_scadenza:idScadenza,email:dati.email1,tipo:'extra'});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(dati.email2&amp;&amp;dati.email2!==utenteCorrente.email&amp;&amp;dati.email2!==gruppoCorrente.email_gruppo)destinatari.push({id_scadenza:idScadenza,email:dati.email2,tipo:'extra'});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>await db.from('scadenze_destinatari').insert(destinatari);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalConfirm').disabled=false;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>closeModal();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>showToast(mode==='create'?'Salvato':'Aggiornato',mode==='create'?'Nuova scadenza inserita.':'Modifica salvata.');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>await carica();</p>
+<p class="p1">}</p>
+<p class="p1">function openDeleteConfirm(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!selectedId)return;const row=all.find(r=&gt;String(r.id)===String(selectedId));if(!row)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmText').innerHTML=`</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:grid;gap:6px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="font-weight:800;font-size:18px;line-height:1.15"&gt;${escapeHtml(row.descrizione)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted" style="font-size:15px;font-weight:600"&gt;${escapeHtml(row.categoria)} · ${escapeHtml(row.sottoCategoria)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted"&gt;&lt;strong&gt;Scadenza:&lt;/strong&gt; ${escapeHtml(row.scadenzaIT)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>${row.note?`&lt;div class="cell-muted"&gt;&lt;strong&gt;Note:&lt;/strong&gt; ${escapeHtml(row.note)}&lt;/div&gt;`:''}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="cell-muted" style="margin-top:10px"&gt;L'evento sarà eliminato logicamente e resterà nello storico fino alla data di retention.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setActiveRow(selectedId);setRowActionClass('delete');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmBackdrop').style.display='flex';</p>
+<p class="p1">}</p>
+<p class="p1">function closeConfirm(){document.getElementById('confirmBackdrop').style.display='none';clearActiveRow();}</p>
+<p class="p1">async function doDelete(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmOk').disabled=true;const idToRemove=selectedId;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const{error}=await db.from('scadenze').update({eliminato:true,eliminato_il:new Date().toISOString()}).eq('id',idToRemove);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmOk').disabled=false;closeConfirm();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(error){showToast('Errore',error.message);return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>showToast('Eliminato','Evento eliminato logicamente.');clearSelection();await carica();</p>
+<p class="p1">}</p>
+<p class="p1">function openRenew(id){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renewId=id;const row=all.find(r=&gt;String(r.id)===String(id));if(!row)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setActiveRow(id);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rOldScadenza').value=row.scadenzaIT;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rNote').value=row.note;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rScadenza').value=calcolaProssimaScadenza(row.scadenzaISO,row.ricorrenza,row.ogniX);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const r=String(row.ricorrenza||'NESSUNA').toUpperCase();const x=row.ogniX||'?';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const rm={GIORNALIERA:'Giornaliera',SETTIMANALE:'Settimanale',MENSILE:'Mensile',ANNUALE:'Annuale',X_GIORNI:`Ogni ${x} giorni`,X_SETTIMANE:`Ogni ${x} settimane`,X_MESI:`Ogni ${x} mesi`};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rRule').value=rm[r]||'—';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewBackdrop').style.display='flex';</p>
+<p class="p1">}</p>
+<p class="p1">function closeRenewModal(){document.getElementById('renewBackdrop').style.display='none';clearActiveRow();}</p>
+<p class="p1">async function confirmRenew(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const nuovaScadenza=document.getElementById('rScadenza').value;const note=document.getElementById('rNote').value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!nuovaScadenza){showToast('Dati mancanti','Inserisci la nuova scadenza.');return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewOk').disabled=true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const{error}=await db.from('scadenze').update({scadenza:nuovaScadenza,note}).eq('id',renewId);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewOk').disabled=false;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(error){showToast('Errore',error.message);return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>closeRenewModal();showToast('Rinnovato','Scadenza aggiornata.');await carica();</p>
+<p class="p1">}</p>
+<p class="p1">function openPastDateConfirm(msg,fn){_pastDateContinue=fn;document.getElementById('pastDateText').textContent=msg;document.getElementById('pastDateBackdrop').style.display='flex';}</p>
+<p class="p1">function closePastDateConfirm(){document.getElementById('pastDateBackdrop').style.display='none';}</p>
+<p class="p1">function popolaAutocomplete(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const categorie=[...new Set(all.map(r=&gt;r.categoria).filter(Boolean))].sort();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sottoCat=[...new Set(all.map(r=&gt;r.sottoCategoria).filter(Boolean))].sort();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const descrizioni=[...new Set(all.map(r=&gt;r.descrizione).filter(Boolean))].sort();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const emails=[...new Set([...all.map(r=&gt;r.email1),...all.map(r=&gt;r.email2)].filter(Boolean))].sort();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fillDatalist('dlCategoria',categorie);fillDatalist('dlSottoCategoria',sottoCat);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fillDatalist('dlDescrizione',descrizioni);fillDatalist('dlEmail',emails);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const fCat=document.getElementById('fCategoria');const curVal=fCat.value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fCat.innerHTML='&lt;option value=""&gt;Tutte&lt;/option&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>categorie.forEach(c=&gt;{const o=document.createElement('option');o.value=c;o.textContent=c;fCat.appendChild(o);});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fCat.value=curVal;updateSottoCategoriaOptions();</p>
+<p class="p1">}</p>
+<p class="p1">function fillDatalist(id,items){const dl=document.getElementById(id);if(!dl)return;dl.innerHTML='';items.forEach(v=&gt;{const o=document.createElement('option');o.value=v;dl.appendChild(o);});}</p>
+<p class="p1">function updateSottoCategoriaOptions(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cat=document.getElementById('fCategoria')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sottoCat=[...new Set(all.filter(r=&gt;!cat||r.categoria===cat).map(r=&gt;r.sottoCategoria).filter(Boolean))].sort();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const fSub=document.getElementById('fSottoCategoria');const cur=fSub.value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fSub.innerHTML='&lt;option value=""&gt;Tutte&lt;/option&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>sottoCat.forEach(s=&gt;{const o=document.createElement('option');o.value=s;o.textContent=s;fSub.appendChild(o);});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>fSub.value=sottoCat.includes(cur)?cur:'';</p>
+<p class="p1">}</p>
+<p class="p1">function showToast(title,msg){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('toastTitle').textContent=title;document.getElementById('toastMsg').textContent=msg;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const t=document.getElementById('toast');t.style.display='block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>clearTimeout(showToast._tm);showToast._tm=setTimeout(()=&gt;t.style.display='none',3200);</p>
+<p class="p1">}</p>
+<p class="p1">function setLoading(on){document.getElementById('tableCard').classList.toggle('loading',!!on);document.getElementById('btnAggiorna').disabled=!!on;}</p>
+<p class="p1">function escapeHtml(s){return String(s??'').replaceAll('&amp;','&amp;amp;').replaceAll('&lt;','&amp;lt;').replaceAll('&gt;','&amp;gt;').replaceAll('"','&amp;quot;').replaceAll("'",'&amp;#039;');}</p>
+<p class="p1">function debounce(fn,ms){let t;return(...args)=&gt;{clearTimeout(t);t=setTimeout(()=&gt;fn(...args),ms);};}</p>
+<p class="p2"><br></p>
+<p class="p1">function wireUiOnce(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(wireUiOnce._done)return;wireUiOnce._done=true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnInserisci').addEventListener('click',openCreate);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnModifica').addEventListener('click',openEdit);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnElimina').addEventListener('click',openDeleteConfirm);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnAggiorna').addEventListener('click',carica);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnEsci').addEventListener('click',async()=&gt;{await db.auth.signOut();window.location.href='index.html';});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('mRicorrenza').addEventListener('change',toggleOgniX);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalClose').addEventListener('click',closeModal);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalCancel').addEventListener('click',closeModal);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modalConfirm').addEventListener('click',confirmModal);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmClose').addEventListener('click',closeConfirm);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmCancel').addEventListener('click',closeConfirm);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('confirmOk').addEventListener('click',doDelete);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('pastDateClose').addEventListener('click',closePastDateConfirm);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('pastDateCancel').addEventListener('click',closePastDateConfirm);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('pastDateOk').addEventListener('click',()=&gt;{const fn=_pastDateContinue;closePastDateConfirm();if(fn)fn();});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewClose').addEventListener('click',closeRenewModal);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewCancel').addEventListener('click',closeRenewModal);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('renewOk').addEventListener('click',confirmRenew);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('thScadenza').addEventListener('click',()=&gt;cycleSortTh('thScadenza','dateAsc','dateDesc'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('thCategoria').addEventListener('click',()=&gt;cycleSortTh('thCategoria','cat','catDesc'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('thDescrizione').addEventListener('click',()=&gt;cycleSortTh('thDescrizione','descAsc','descDesc'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('thPreavviso').addEventListener('click',()=&gt;cycleSortTh('thPreavviso','prevAsc','prevDesc'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('q').addEventListener('input',debounce(applyFilters,200));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('fCategoria').addEventListener('change',()=&gt;{updateSottoCategoriaOptions();applyFilters();});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=&gt;{document.getElementById(id)?.addEventListener('change',applyFilters);});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('fEntroVal')?.addEventListener('input',debounce(applyFilters,200));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const btnFiltri=document.getElementById('btnFiltri');const popover=document.getElementById('filtriPopover');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>btnFiltri.addEventListener('click',()=&gt;{popover.style.display=popover.style.display==='none'?'block':'none';});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnApplicaFiltri').addEventListener('click',()=&gt;{popover.style.display='none';applyFilters();});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('btnResetFiltri').addEventListener('click',()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>['fCategoria','fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fEntroVal'].forEach(id=&gt;{const el=document.getElementById(id);if(el)el.value='';});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('fEntroUnit').value='days';document.getElementById('fSort').value='priority';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>popover.style.display='none';updateSottoCategoriaOptions();applyFilters();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tbody=document.getElementById('tbody');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tbody.addEventListener('change',ev=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(ev.target.name!=='selRow')return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tbody.querySelectorAll('input[name="selRow"]').forEach(x=&gt;{if(x!==ev.target)x.checked=false;});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(ev.target.checked)setSelection(ev.target.value);else clearSelection();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tbody.addEventListener('click',ev=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const btn=ev.target.closest?.('button');if(!btn)return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const action=btn.dataset.action;const rowId=btn.dataset.rowid;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(action==='toggleInfo'){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tr=btn.closest('tr');const next=tr.nextElementSibling;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const isThis=next?.classList.contains('details-row')&amp;&amp;next.dataset.detailsFor===String(rowId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(isThis){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const box=next.querySelector('.details');const isOpen=next.style.display==='table-row';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>next.style.display=isOpen?'none':'table-row';if(box)box.style.display=isOpen?'none':'block';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>btn.textContent=isOpen?'+ Info':'− Chiudi';return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const rowObj=view.find(x=&gt;String(x.id)===String(rowId))||all.find(x=&gt;String(x.id)===String(rowId));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(!rowObj)return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ric=String(rowObj.ricorrenza||'NESSUNA').toUpperCase();const x=rowObj.ogniX||'?';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ricLabelMap={GIORNALIERA:'Giornaliera',SETTIMANALE:'Settimanale',MENSILE:'Mensile',ANNUALE:'Annuale',X_GIORNI:`Ogni ${x} giorni`,X_SETTIMANE:`Ogni ${x} settimane`,X_MESI:`Ogni ${x} mesi`};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ricLabel=ricLabelMap[ric]||'';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const ricBlock=(ric!=='NESSUNA'&amp;&amp;ricLabel)?`&lt;div class="kv"&gt;&lt;div class="k"&gt;Ricorrenza&lt;/div&gt;&lt;div class="v"&gt;${escapeHtml(ricLabel)}&lt;/div&gt;&lt;/div&gt;`:'';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const autoBlock=rowObj.rinnovoAuto?`&lt;div class="kv"&gt;&lt;div class="k"&gt;Rinnovo&lt;/div&gt;&lt;div class="v"&gt;&lt;span class="pill" style="background:rgba(124,240,194,.15);color:#7cf0c2;border:1px solid rgba(124,240,194,.3)"&gt;<span class="s3">🔄</span> Automatico&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;`:'';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const details=document.createElement('tr');details.className='details-row';details.dataset.detailsFor=String(rowId);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const td=document.createElement('td');td.colSpan=7;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const box=document.createElement('div');box.className='details';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box.innerHTML=`&lt;div class="detailsGrid"&gt;${ricBlock}${autoBlock}&lt;div class="kv"&gt;&lt;div class="k"&gt;Note&lt;/div&gt;&lt;div class="v"&gt;${escapeHtml(rowObj.note||'—')}&lt;/div&gt;&lt;/div&gt;&lt;div class="kv"&gt;&lt;div class="k"&gt;Email 1&lt;/div&gt;&lt;div class="v"&gt;${escapeHtml(rowObj.email1||'—')}&lt;/div&gt;&lt;/div&gt;&lt;div class="kv"&gt;&lt;div class="k"&gt;Email 2&lt;/div&gt;&lt;div class="v"&gt;${escapeHtml(rowObj.email2||'—')}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>td.appendChild(box);details.appendChild(td);tr.after(details);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>details.style.display='table-row';box.style.display='block';btn.textContent='− Chiudi';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
