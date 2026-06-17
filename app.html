@@ -413,7 +413,6 @@ function calcolaProssimaScadenza(iso,ricorrenza,ogniX){
   return d.toISOString().split('T')[0];
 }
 function addMesiSafe(d,mesi){ const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+mesi); const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last)); }
-<script>
 function render(){
   const tbody=document.getElementById('tbody'); tbody.innerHTML=''; const frag=document.createDocumentFragment();
   view.forEach(row=>{
