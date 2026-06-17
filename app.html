@@ -564,6 +564,23 @@ async function confirmModal(){
   const categoria=document.getElementById('mCategoria').value.trim();
   const scadenza=document.getElementById('mScadenza').value;
   if(!descrizione||!categoria||!scadenza){showToast('Dati mancanti','Categoria, descrizione e scadenza sono obbligatorie.');return;}
+  // Controllo modifiche in modalità edit
+  if(mode==='edit'&&originalEdit){
+    const emailsExtra=[];
+    for(let i=1;i<=5;i++){const v=document.getElementById(`mEmail${i}`).value.trim();if(v)emailsExtra.push(v);}
+    const nessuna=
+      categoria===originalEdit.categoria&&
+      document.getElementById('mSottoCategoria').value.trim()===originalEdit.sottoCategoria&&
+      descrizione===originalEdit.descrizione&&
+      scadenza===originalEdit.scadenzaISO&&
+      Number(document.getElementById('mPreavviso').value||0)===(originalEdit.preavviso??0)&&
+      document.getElementById('mRicorrenza').value===originalEdit.ricorrenza&&
+      String(document.getElementById('mOgniX').value||'')===String(originalEdit.ogniX||'')&&
+      document.getElementById('mRinnovoAuto').checked===originalEdit.rinnovoAuto&&
+      document.getElementById('mNote').value.trim()===originalEdit.note&&
+      JSON.stringify(emailsExtra)===JSON.stringify(originalEdit.emails);
+    if(nessuna){showToast('Nessuna modifica','Non sono state apportate modifiche.');closeModal();return;}
+  }
   // Raccoglie le 5 email extra
   const emailsExtra=[];
   for(let i=1;i<=5;i++){
