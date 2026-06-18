@@ -666,7 +666,7 @@ function toggleOgniX(){
   if(!isX)document.getElementById('mOgniX').value='';
   const lbl=document.getElementById('lblOgniX');
   if(lbl){if(val==='X_GIORNI')lbl.textContent='Ogni X giorni';else if(val==='X_SETTIMANE')lbl.textContent='Ogni X settimane';else lbl.textContent='Ogni X mesi';}
-  const canAuto=hasR&&!['NESSUNA','GIORNALIERA','X_GIORNI'].includes(val);
+  const canAuto=hasR&&!['NESSUNA','GIORNALIERA'].includes(val);
   document.getElementById('grpRinnovoAuto').style.display=canAuto?'block':'none';
   const cb=document.getElementById('mRinnovoAuto');
   if(val==='GIORNALIERA'){cb.checked=true;}else if(!canAuto){cb.checked=false;}
