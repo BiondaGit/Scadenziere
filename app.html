@@ -685,7 +685,7 @@ async function confirmModal(){
   const ogniXVal=Number(document.getElementById('mOgniX').value);
   if(['X_GIORNI','X_SETTIMANE','X_MESI'].includes(ricorrenzaVal)){
     const label=ricorrenzaVal==='X_GIORNI'?'giorni':ricorrenzaVal==='X_SETTIMANE'?'settimane':'mesi';
-    if(!ogniXVal||ogniXVal<2){showToast('Valore non valido','Per la ricorrenza "Ogni X '+label+'" devi inserire un numero di almeno 2.');return;}
+    if(!ogniXVal||ogniXVal<2){showToast('Valore non valido','Per la ricorrenza "Ogni X '+label+'" devi inserire un numero maggiore di 1.');return;}
   }
   // Controllo modifiche in modalità edit
   if(mode==='edit'&&originalEdit){
