@@ -680,6 +680,13 @@ async function confirmModal(){
   const categoria=toTitleCase(document.getElementById('mCategoria').value.trim());
   const scadenza=document.getElementById('mScadenza').value;
   if(!descrizione||!categoria||!scadenza){showToast('Dati mancanti','Categoria, descrizione e scadenza sono obbligatorie.');return;}
+  // Validazione ogni_x per ricorrenze X_GIORNI, X_SETTIMANE, X_MESI
+  const ricorrenzaVal=document.getElementById('mRicorrenza').value;
+  const ogniXVal=Number(document.getElementById('mOgniX').value);
+  if(['X_GIORNI','X_SETTIMANE','X_MESI'].includes(ricorrenzaVal)){
+    const label=ricorrenzaVal==='X_GIORNI'?'giorni':ricorrenzaVal==='X_SETTIMANE'?'settimane':'mesi';
+    if(!ogniXVal||ogniXVal<2){showToast('Valore non valido','Per la ricorrenza "Ogni X '+label+'" devi inserire un numero di almeno 2.');return;}
+  }
   // Controllo modifiche in modalità edit
   if(mode==='edit'&&originalEdit){
     const emailsExtra=[];
