@@ -944,7 +944,8 @@ function wireUiOnce(){
   document.getElementById('thCategoria').addEventListener('click',()=>cycleSortTh('thCategoria','cat','catDesc'));
   document.getElementById('thDescrizione').addEventListener('click',()=>cycleSortTh('thDescrizione','descAsc','descDesc'));
   document.getElementById('thPreavviso').addEventListener('click',()=>cycleSortTh('thPreavviso','prevAsc','prevDesc'));
-  document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
+ document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
+ document.getElementById('q').addEventListener('input',(e)=>{if(e.target.value.trim()===''){applyFilters();}});
   document.getElementById('fCategoria').addEventListener('change',async()=>{await carica();updateSottoCategoriaOptions();applyFilters();});
   ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',async()=>{await carica();applyFilters();});});
   document.getElementById('fEntroVal')?.addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
