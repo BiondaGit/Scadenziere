@@ -746,11 +746,11 @@ async function doSalva(dati){
   let idScadenza;
   if(mode==='create'){
     const{data,error}=await db.from('scadenze').insert(payload).select('id').single();
-    if(error){showToast('Errore',error.message);document.getElementById('modalConfirm').disabled=false;return;}
+    if(error){showToast('Errore',traduciErrore(error.message));document.getElementById('modalConfirm').disabled=false;return;}
     idScadenza=data.id;
   }else{
     const{error}=await db.from('scadenze').update(payload).eq('id',selectedId);
-    if(error){showToast('Errore',error.message);document.getElementById('modalConfirm').disabled=false;return;}
+    if(error){showToast('Errore',traduciErrore(error.message));document.getElementById('modalConfirm').disabled=false;return;}
     idScadenza=selectedId;
     await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza);
   }
@@ -793,8 +793,8 @@ async function doDelete(){
   document.getElementById('confirmOk').disabled=true;const idToRemove=selectedId;
   const{error}=await db.from('scadenze').update({eliminato:true,eliminato_il:new Date().toISOString()}).eq('id',idToRemove);
   document.getElementById('confirmOk').disabled=false;closeConfirm();
-  if(error){showToast('Errore',error.message);return;}
-  showToast('Eliminato','Evento eliminato logicamente.');clearSelection();await carica();
+  if(error){showToast('Errore',traduciErrore(error.message));return;}
+    showToast('Eliminato','Evento eliminato logicamente.');clearSelection();await carica();
 }
 
 function openRenew(id){
@@ -816,8 +816,8 @@ async function confirmRenew(){
   document.getElementById('renewOk').disabled=true;
   const{error}=await db.from('scadenze').update({scadenza:nuovaScadenza,note}).eq('id',renewId);
   document.getElementById('renewOk').disabled=false;
-  if(error){showToast('Errore',error.message);return;}
-  closeRenewModal();showToast('Rinnovato','Scadenza aggiornata.');await carica();
+  if(error){showToast('Errore',traduciErrore(error.message));return;}
+    closeRenewModal();showToast('Rinnovato','Scadenza aggiornata.');await carica();
 }
 
 function openPastDateConfirm(msg,fn){_pastDateContinue=fn;document.getElementById('pastDateText').textContent=msg;document.getElementById('pastDateBackdrop').style.display='flex';}
@@ -843,6 +843,17 @@ function updateSottoCategoriaOptions(){
   fSub.innerHTML='<option value="">Tutte</option>';
   sottoCat.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fSub.appendChild(o);});
   fSub.value=sottoCat.includes(cur)?cur:'';
+}
+function traduciErrore(msg){
+  const m = String(msg||'');
+  if(m.includes('ogni_x_check')) return 'Il valore "Ogni X" inserito non è valido per questa ricorrenza.';
+  if(m.includes('duplicate key')) return 'Esiste già un elemento con questi dati.';
+  if(m.includes('violates row-level security') || m.includes('permission denied')) return 'Non hai i permessi per completare questa operazione.';
+  if(m.includes('Invalid login credentials')) return 'Credenziali non valide.';
+  if(m.includes('Password should be at least')) return 'La password deve avere almeno 6 caratteri.';
+  if(m.includes('network') || m.includes('fetch')) return 'Problema di connessione. Controlla la rete e riprova.';
+  if(m.includes('JWT') || m.includes('token')) return 'Sessione scaduta. Effettua di nuovo l\'accesso.';
+  return 'Si è verificato un problema imprevisto. Riprova o contatta l\'amministratore.';
 }
 function showToast(title,msg){
   document.getElementById('toastTitle').textContent=title;document.getElementById('toastMsg').textContent=msg;
@@ -912,12 +923,12 @@ async function salvaImpostazioni() {
   const { error: errProfilo } = await db.from('utenti')
     .update({ nome: nuovoNome, tema: temaSelezionato })
     .eq('id', utenteCorrente.id);
-  if (errProfilo) { showToast('Errore', errProfilo.message); document.getElementById('settSalva').disabled = false; return; }
+  if (errProfilo) { showToast('Errore', traduciErrore(errProfilo.message)); document.getElementById('settSalva').disabled = false; return; }
 
   // Aggiorna password su Supabase Auth (solo se inserita)
   if (pwd1) {
     const { error: errPwd } = await db.auth.updateUser({ password: pwd1 });
-    if (errPwd) { showToast('Errore password', errPwd.message); document.getElementById('settSalva').disabled = false; return; }
+   if (errPwd) { showToast('Errore password', traduciErrore(errPwd.message)); document.getElementById('settSalva').disabled = false; return; }
   }
 
   // Aggiorna stato locale
