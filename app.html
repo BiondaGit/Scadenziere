@@ -608,7 +608,22 @@ function applyFilters(){
   else if(sortMode==='descDesc'){view.sort((a,b)=>(b.descrizione||'').localeCompare(a.descrizione||''));}
   else if(sortMode==='prevAsc'){view.sort((a,b)=>(Number(a.preavviso)||0)-(Number(b.preavviso)||0));}
   else if(sortMode==='prevDesc'){view.sort((a,b)=>(Number(b.preavviso)||0)-(Number(a.preavviso)||0));}
-  clearSelection(); render(); updateHeaderIndicators();
+  clearSelection(); render(); updateHeaderIndicators(); updateFiltriBadge();
+}
+
+function updateFiltriBadge(){
+  const cat=document.getElementById('fCategoria')?.value||'';
+  const sub=document.getElementById('fSottoCategoria')?.value||'';
+  const da=document.getElementById('fDataDa')?.value||'';
+  const a=document.getElementById('fDataA')?.value||'';
+  const stato=document.getElementById('fStato')?.value||'';
+  const fRic=document.getElementById('fRicorrenza')?.value||'';
+  const entroVal=document.getElementById('fEntroVal')?.value||'';
+  let n=0;
+  if(cat)n++; if(sub)n++; if(da)n++; if(a)n++; if(stato)n++; if(fRic)n++; if(entroVal)n++;
+  const btn=document.getElementById('btnFiltri');
+  btn.textContent=n>0?`Filtri (${n})`:'Filtri';
+}
 }
 
 function updateHeaderIndicators(){
