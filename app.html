@@ -835,7 +835,7 @@ function showToast(title,msg){
   const t=document.getElementById('toast');t.style.display='block';
   clearTimeout(showToast._tm);showToast._tm=setTimeout(()=>t.style.display='none',3200);
 }
-function setLoading(on){document.getElementById('tableCard').classList.toggle('loading',!!on);document.getElementById('btnAggiorna').disabled=!!on;}
+function setLoading(on){document.getElementById('tableCard').classList.toggle('loading',!!on);}
 function escapeHtml(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
 function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms);};}
 function toTitleCase(str){
@@ -927,7 +927,6 @@ function wireUiOnce(){
   document.getElementById('btnInserisci').addEventListener('click',openCreate);
   document.getElementById('btnModifica').addEventListener('click',openEdit);
   document.getElementById('btnElimina').addEventListener('click',openDeleteConfirm);
-  document.getElementById('btnAggiorna').addEventListener('click',carica);
   document.getElementById('mRicorrenza').addEventListener('change',toggleOgniX);
   document.getElementById('modalClose').addEventListener('click',closeModal);
   document.getElementById('modalCancel').addEventListener('click',closeModal);
@@ -945,17 +944,17 @@ function wireUiOnce(){
   document.getElementById('thCategoria').addEventListener('click',()=>cycleSortTh('thCategoria','cat','catDesc'));
   document.getElementById('thDescrizione').addEventListener('click',()=>cycleSortTh('thDescrizione','descAsc','descDesc'));
   document.getElementById('thPreavviso').addEventListener('click',()=>cycleSortTh('thPreavviso','prevAsc','prevDesc'));
-  document.getElementById('q').addEventListener('input',debounce(applyFilters,200));
-  document.getElementById('fCategoria').addEventListener('change',()=>{updateSottoCategoriaOptions();applyFilters();});
-  ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',applyFilters);});
-  document.getElementById('fEntroVal')?.addEventListener('input',debounce(applyFilters,200));
+  document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
+  document.getElementById('fCategoria').addEventListener('change',async()=>{await carica();updateSottoCategoriaOptions();applyFilters();});
+  ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',async()=>{await carica();applyFilters();});});
+  document.getElementById('fEntroVal')?.addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
   const btnFiltri=document.getElementById('btnFiltri');const popover=document.getElementById('filtriPopover');
   btnFiltri.addEventListener('click',()=>{popover.style.display=popover.style.display==='none'?'block':'none';});
-  document.getElementById('btnApplicaFiltri').addEventListener('click',()=>{popover.style.display='none';applyFilters();});
-  document.getElementById('btnResetFiltri').addEventListener('click',()=>{
+  document.getElementById('btnApplicaFiltri').addEventListener('click',async()=>{popover.style.display='none';await carica();applyFilters();});
+  document.getElementById('btnResetFiltri').addEventListener('click',async()=>{
     ['fCategoria','fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fEntroVal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('fEntroUnit').value='days';document.getElementById('fSort').value='priority';
-    popover.style.display='none';updateSottoCategoriaOptions();applyFilters();
+    popover.style.display='none';await carica();updateSottoCategoriaOptions();applyFilters();
   });
   const tbody=document.getElementById('tbody');
   tbody.addEventListener('change',ev=>{
@@ -997,6 +996,9 @@ function wireUiOnce(){
 }
 
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
+
+// Aggiornamento automatico ogni 5 minuti
+setInterval(async()=>{await carica();applyFilters();},5*60*1000);
 </script>
 </body>
 </html>
