@@ -866,6 +866,13 @@ function applicaTema(tema) {
   document.querySelectorAll('.temaBtn').forEach(b => b.classList.toggle('active', b.dataset.tema === (tema||'scuro')));
 }
 
+// Aggiorna il tema in tempo reale se il sistema operativo cambia (solo se tema="sistema")
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (utenteCorrente && utenteCorrente.tema === 'sistema') {
+    applicaTema('sistema');
+  }
+});
+  
 // ── Impostazioni ──
 function openImpostazioni() {
   if (!utenteCorrente) return;
