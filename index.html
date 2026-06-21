@@ -179,10 +179,17 @@
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    // ── Mostra eventuale messaggio salvato da app.html (es. gruppo sospeso) ──
+    const msgSalvato = sessionStorage.getItem('msgLogin');
+    if (msgSalvato) {
+      mostraMessaggio(msgSalvato, 'errore');
+      sessionStorage.removeItem('msgLogin');
+    }
+
     // ── Se già autenticato → vai diretto a app.html ──
     (async () => {
       const { data: { session } } = await db.auth.getSession();
-      if (session) { window.location.href = 'app.html'; }
+      if (session && !msgSalvato) { window.location.href = 'app.html'; }
     })();
 
     // ── Elementi UI ──
