@@ -280,6 +280,10 @@
       </div>
     </div>
     <div class="chip" id="count">0 eventi</div>
+    <button class="btn" id="btnExportCsv" title="Esporta in CSV">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Esporta CSV
+    </button>
   </div>
 
   <div class="card" id="tableCard">
@@ -875,6 +879,32 @@ function showToast(title,msg){
   const t=document.getElementById('toast');t.style.display='block';
   clearTimeout(showToast._tm);showToast._tm=setTimeout(()=>t.style.display='none',3200);
 }
+function esportaCSV(){
+  if(view.length===0){showToast('Nessun dato','Non ci sono scadenze da esportare.');return;}
+  const intestazioni=['Categoria','Sotto categoria','Descrizione','Scadenza','Preavviso (giorni)','Ricorrenza','Ogni X','Rinnovo automatico','Note','Email extra'];
+  const righe=view.map(r=>[
+    r.categoria,
+    r.sottoCategoria,
+    r.descrizione,
+    r.scadenzaIT,
+    r.preavviso,
+    r.ricorrenza,
+    r.ogniX,
+    r.rinnovoAuto?'Sì':'No',
+    (r.note||'').replace(/[\r\n;]+/g,' '),
+    (r.emails||[]).join(', ')
+  ]);
+  const escapeCsv=v=>{const s=String(v??'');return s.includes(';')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csv=[intestazioni,...righe].map(riga=>riga.map(escapeCsv).join(';')).join('\r\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const oggi=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`scadenze_export_${oggi}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 function setLoading(on){document.getElementById('tableCard').classList.toggle('loading',!!on);}
 function escapeHtml(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
 function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms);};}
@@ -977,6 +1007,7 @@ function wireUiOnce(){
     });
   });
   document.getElementById('btnInserisci').addEventListener('click',openCreate);
+  document.getElementById('btnExportCsv').addEventListener('click',esportaCSV);
   document.getElementById('btnModifica').addEventListener('click',openEdit);
   document.getElementById('btnElimina').addEventListener('click',openDeleteConfirm);
   document.getElementById('mRicorrenza').addEventListener('change',toggleOgniX);
