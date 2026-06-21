@@ -700,6 +700,25 @@ function openEdit(){
   originalEdit={...row};toggleOgniX();setActiveRow(selectedId);setRowActionClass('edit');openModal();
 }
 
+  function duplicaScadenza(rowId){
+  const row=all.find(r=>String(r.id)===String(rowId));if(!row)return;
+  openCreate(); // resetta il modale come "Nuova scadenza" e apre
+  document.getElementById('modalTitle').textContent='Duplica scadenza';
+  document.getElementById('mCategoria').value=row.categoria;
+  document.getElementById('mSottoCategoria').value=row.sottoCategoria;
+  document.getElementById('mDescrizione').value=row.descrizione;
+  // mScadenza resta vuoto volutamente: l'utente deve scegliere una nuova data
+  document.getElementById('mRicorrenza').value=row.ricorrenza;
+  document.getElementById('mOgniX').value=row.ogniX||'';
+  document.getElementById('mPreavviso').value=row.preavviso??0;
+  document.getElementById('mNote').value=row.note;
+  for(let i=1;i<=5;i++){
+    document.getElementById(`mEmail${i}`).value=row.emails[i-1]||'';
+  }
+  document.getElementById('mRinnovoAuto').checked=row.rinnovoAuto;
+  toggleOgniX();
+}
+  
 function toggleOgniX(){
   const val=document.getElementById('mRicorrenza').value;
   const isX=['X_GIORNI','X_SETTIMANE','X_MESI'].includes(val);
