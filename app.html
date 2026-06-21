@@ -1095,6 +1095,7 @@ function wireUiOnce(){
     const btn=ev.target.closest?.('button');if(!btn)return;
     const action=btn.dataset.action;const rowId=btn.dataset.rowid;
     if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}
+    if(action==='duplicate'){ev.stopPropagation();duplicaScadenza(rowId);return;}if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}
     if(action==='toggleInfo'){
       const tr=btn.closest('tr');const next=tr.nextElementSibling;
       const isThis=next?.classList.contains('details-row')&&next.dataset.detailsFor===String(rowId);
