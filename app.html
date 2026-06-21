@@ -471,6 +471,17 @@ async function avvia() {
   });
 
   const { data:utente, error } = await db.from('utenti').select('*,gruppi(*)').eq('id',session.user.id).single();
+
+  // Se il profilo non è leggibile, o leggibile ma il gruppo non è attivo (gestito da RLS),
+  // l'utente non può proseguire — caso più probabile: gruppo sospeso nel frattempo
+  if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+utenteCorrente=utente; gruppoCorrente=utente.gruppi;
   if (error||!utente) { showToast('Errore','Profilo utente non trovato.'); return; }
   utenteCorrente=utente; gruppoCorrente=utente.gruppi;
   document.getElementById('nomeGruppo').textContent=gruppoCorrente?.nome||'';
