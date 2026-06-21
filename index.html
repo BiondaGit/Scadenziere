@@ -220,7 +220,20 @@
         return;
       }
 
-      // Login riuscito
+      /// Login riuscito — verifica che il gruppo dell'utente sia attivo
+      const { data: profilo, error: errProfilo } = await db
+        .from('utenti')
+        .select('id, gruppi(attivo)')
+        .eq('id', data.user.id)
+        .single();
+
+      if (errProfilo || !profilo || !profilo.gruppi || profilo.gruppi.attivo !== true) {
+        await db.auth.signOut();
+        mostraMessaggio('Il tuo gruppo è stato sospeso. Contatta l\'amministratore.', 'errore');
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Accedi';
+        return;
+      }
       mostraMessaggio('Accesso effettuato. Caricamento…', 'info');
       window.location.href = 'app.html';
     });
