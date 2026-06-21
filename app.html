@@ -492,7 +492,21 @@ utenteCorrente=utente; gruppoCorrente=utente.gruppi;
   await db.from('utenti').update({ultimo_accesso:new Date().toISOString()}).eq('id',session.user.id);
   await carica(); wireUiOnce();
 }
+  
+// Verifica che il gruppo sia ancora attivo. Se non lo è, blocca l'utente con messaggio chiaro.
+async function verificaGruppoAttivo() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return false;
 
+  const { data: utente, error } = await db.from('utenti').select('id,gruppi(attivo)').eq('id', session.user.id).single();
+  if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return false;
+  }
+  return true;
+}
 async function carica() {
   setLoading(true);
   const { data, error } = await db
@@ -1093,7 +1107,11 @@ function wireUiOnce(){
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
 
 // Aggiornamento automatico ogni 5 minuti
-setInterval(async()=>{await carica();applyFilters();},5*60*1000);
+setInterval(async()=>{
+  const ok = await verificaGruppoAttivo();
+  if (!ok) return;
+  await carica(); applyFilters();
+},5*60*1000);
 </script>
 </body>
 </html>
