@@ -586,6 +586,7 @@ function render(){
     const tdMore=document.createElement('td');
     const ric=String(row.ricorrenza||'NESSUNA').toUpperCase();
     if(ric!=='NESSUNA'){const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='↻';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);}
+    const dupBtn=document.createElement('button');dupBtn.className='renewBtn';dupBtn.title='Duplica';dupBtn.textContent='⧉';dupBtn.dataset.action='duplicate';dupBtn.dataset.rowid=String(row.id);tdMore.appendChild(dupBtn);
     const btn=document.createElement('button');btn.className='moreBtn';btn.textContent='+ Info';btn.dataset.action='toggleInfo';btn.dataset.rowid=String(row.id);tdMore.appendChild(btn);
     tr.append(tdSel,tdDesc,tdCat,tdScad,tdPrev,tdStato,tdMore);
     tr.classList.toggle('row-overdue',row.status==='overdue');
