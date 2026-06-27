@@ -511,7 +511,7 @@ async function carica() {
   setLoading(true);
   const { data, error } = await db
     .from('scadenze')
-    .select('id,categoria,sotto_categoria,descrizione,scadenza,preavviso_giorni,ricorrenza,ogni_x,rinnovo_auto,note,eliminato,scadenze_destinatari(email,tipo)')
+    .select('id,categoria,sotto_categoria,descrizione,scadenza,preavviso_giorni,ricorrenza,ogni_x,rinnovo_auto,rinnovo_sospeso,note,eliminato,scadenze_destinatari(email,tipo)')
     .eq('eliminato',false)
     .order('scadenza',{ascending:true});
   setLoading(false);
@@ -524,7 +524,7 @@ async function carica() {
       id:r.id, categoria:r.categoria||'', sottoCategoria:r.sotto_categoria||'',
       descrizione:r.descrizione||'', scadenzaISO:r.scadenza||'', scadenzaIT:isoToIt(r.scadenza),
       preavviso:r.preavviso_giorni??0, ricorrenza:r.ricorrenza||'NESSUNA',
-      ogniX:r.ogni_x||'', rinnovoAuto:r.rinnovo_auto===true, note:r.note||'',
+      ogniX:r.ogni_x||'', rinnovoAuto:r.rinnovo_auto===true, rinnovoSospeso:r.rinnovo_sospeso===true, note:r.note||'',
       emails: extras, // array di email extra
     };
     row.status=computeStatus(row); return row;
@@ -583,9 +583,23 @@ function render(){
     if(row.status==='overdue')tdStato.innerHTML='<span class="pill danger">Scaduta</span>';
     else if(row.status==='due')tdStato.innerHTML='<span class="pill warn">In scadenza</span>';
     else tdStato.innerHTML='<span class="cell-muted">—</span>';
+    if(row.rinnovoAuto&&row.rinnovoSospeso){
+      tdStato.innerHTML+=' <span class="pill" style="background:rgba(255,209,102,.15);color:#ffd166;border-color:rgba(255,209,102,.3)">⏸ Sospeso</span>';
+    }
     const tdMore=document.createElement('td');
     const ric=String(row.ricorrenza||'NESSUNA').toUpperCase();
-    if(ric!=='NESSUNA'){const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='↻';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);}
+    if(ric!=='NESSUNA'){
+      const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='↻';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);
+      if(row.rinnovoAuto){
+        const sb=document.createElement('button');
+        sb.className='renewBtn';
+        sb.title=row.rinnovoSospeso?'Riprendi rinnovo automatico':'Sospendi rinnovo automatico';
+        sb.textContent=row.rinnovoSospeso?'▶':'⏸';
+        sb.dataset.action='toggleSospeso';
+        sb.dataset.rowid=String(row.id);
+        tdMore.appendChild(sb);
+      }
+    }
     const dupBtn=document.createElement('button');dupBtn.className='renewBtn';dupBtn.title='Duplica';dupBtn.textContent='⧉';dupBtn.dataset.action='duplicate';dupBtn.dataset.rowid=String(row.id);tdMore.appendChild(dupBtn);
     const btn=document.createElement('button');btn.className='moreBtn';btn.textContent='+ Info';btn.dataset.action='toggleInfo';btn.dataset.rowid=String(row.id);tdMore.appendChild(btn);
     tr.append(tdSel,tdDesc,tdCat,tdScad,tdPrev,tdStato,tdMore);
@@ -884,6 +898,17 @@ async function confirmRenew(){
   }
 }
 
+async function toggleRinnovoSospeso(id){
+  const row=all.find(r=>String(r.id)===String(id));if(!row)return;
+  const nuovoStato=!row.rinnovoSospeso;
+  try{
+    const{error}=await db.from('scadenze').update({rinnovo_sospeso:nuovoStato}).eq('id',id);
+    if(error){showToast('Errore',traduciErrore(error.message));return;}
+    showToast(nuovoStato?'Sospeso':'Ripreso', nuovoStato?'Rinnovo automatico sospeso.':'Rinnovo automatico ripreso.');
+    await carica();
+  }catch(e){showToast('Errore',traduciErrore(e.message));}
+}
+  
 function openPastDateConfirm(msg,fn){_pastDateContinue=fn;document.getElementById('pastDateText').textContent=msg;document.getElementById('pastDateBackdrop').style.display='flex';}
 function closePastDateConfirm(){document.getElementById('pastDateBackdrop').style.display='none';}
 
@@ -1095,7 +1120,8 @@ function wireUiOnce(){
     const btn=ev.target.closest?.('button');if(!btn)return;
     const action=btn.dataset.action;const rowId=btn.dataset.rowid;
     if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}
-    if(action==='duplicate'){ev.stopPropagation();duplicaScadenza(rowId);return;}if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}
+    if(action==='duplicate'){ev.stopPropagation();duplicaScadenza(rowId);return;}
+    if(action==='toggleSospeso'){ev.stopPropagation();toggleRinnovoSospeso(rowId);return;}
     if(action==='toggleInfo'){
       const tr=btn.closest('tr');const next=tr.nextElementSibling;
       const isThis=next?.classList.contains('details-row')&&next.dataset.detailsFor===String(rowId);
