@@ -880,7 +880,8 @@ function openRenew(id, riprendi=false){
   document.getElementById('rNote').value=row.note;
   if(riprendi){
   const oggi=new Date();
-  document.getElementById('rScadenza').value=`${oggi.getFullYear()}-${String(oggi.getMonth()+1).padStart(2,'0')}-${String(oggi.getDate()).padStart(2,'0')}`;
+  const oggiISO=`${oggi.getFullYear()}-${String(oggi.getMonth()+1).padStart(2,'0')}-${String(oggi.getDate()).padStart(2,'0')}`;
+  document.getElementById('rScadenza').value=calcolaProssimaScadenza(oggiISO,row.ricorrenza,row.ogniX);
   }else{
     document.getElementById('rScadenza').value=calcolaProssimaScadenza(row.scadenzaISO,row.ricorrenza,row.ogniX);
   }
