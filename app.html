@@ -591,15 +591,15 @@ function render(){
     const ric=String(row.ricorrenza||'NESSUNA').toUpperCase();
     if(ric!=='NESSUNA'&&!row.rinnovoAuto){
       const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='↻';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);
-      if(row.rinnovoAuto){
-        const sb=document.createElement('button');
-        sb.className='renewBtn';
-        sb.title=row.rinnovoSospeso?'Riprendi rinnovo automatico':'Sospendi rinnovo automatico';
-        sb.textContent=row.rinnovoSospeso?'▶':'⏸';
-        sb.dataset.action='toggleSospeso';
-        sb.dataset.rowid=String(row.id);
-        tdMore.appendChild(sb);
-      }
+    }
+    if(ric!=='NESSUNA'&&row.rinnovoAuto){
+      const sb=document.createElement('button');
+      sb.className='renewBtn';
+      sb.title=row.rinnovoSospeso?'Riprendi rinnovo automatico':'Sospendi rinnovo automatico';
+      sb.textContent=row.rinnovoSospeso?'▶':'⏸';
+      sb.dataset.action='toggleSospeso';
+      sb.dataset.rowid=String(row.id);
+      tdMore.appendChild(sb);
     }
     const dupBtn=document.createElement('button');dupBtn.className='renewBtn';dupBtn.title='Duplica';dupBtn.textContent='⧉';dupBtn.dataset.action='duplicate';dupBtn.dataset.rowid=String(row.id);tdMore.appendChild(dupBtn);
     const btn=document.createElement('button');btn.className='moreBtn';btn.textContent='+ Info';btn.dataset.action='toggleInfo';btn.dataset.rowid=String(row.id);tdMore.appendChild(btn);
