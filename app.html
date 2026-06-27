@@ -456,6 +456,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let all=[], view=[], selectedId=null, mode='create', renewId=null;
+let renewRiprendi=false;
 let activeRowId=null, originalEdit=null, _pastDateContinue=null;
 let utenteCorrente=null, gruppoCorrente=null;
 
@@ -870,8 +871,10 @@ async function doDelete(){
   }
 }
 
-function openRenew(id){
-  renewId=id;const row=all.find(r=>String(r.id)===String(id));if(!row)return;
+let renewRiprendi=false; // variabile modulo: true quando il rinnovo serve anche a riprendere la sospensione
+function openRenew(id, riprendi=false){
+  renewId=id; renewRiprendi=!!riprendi;
+  const row=all.find(r=>String(r.id)===String(id));if(!row)return;
   setActiveRow(id);
   document.getElementById('rOldScadenza').value=row.scadenzaIT;
   document.getElementById('rNote').value=row.note;
@@ -891,20 +894,35 @@ async function confirmRenew(){
     const{error}=await db.from('scadenze').update({scadenza:nuovaScadenza,note}).eq('id',renewId);
     document.getElementById('renewOk').disabled=false;
     if(error){showToast('Errore',traduciErrore(error.message));return;}
-    closeRenewModal();showToast('Rinnovato','Scadenza aggiornata.');await carica();
+    if(renewRiprendi){
+      const{error:errSospeso}=await db.from('scadenze').update({rinnovo_sospeso:false}).eq('id',renewId);
+      if(errSospeso){showToast('Attenzione','Scadenza aggiornata ma errore nel riprendere il rinnovo automatico.');renewRiprendi=false;closeRenewModal();await carica();return;}
+    }
+    closeRenewModal();
+    showToast('Rinnovato', renewRiprendi?'Rinnovo ripreso con nuova scadenza.':'Scadenza aggiornata.');
+    renewRiprendi=false;
+    await carica();
   }catch(e){
     document.getElementById('renewOk').disabled=false;
+    renewRiprendi=false;
     showToast('Errore',traduciErrore(e.message));
   }
 }
 
 async function toggleRinnovoSospeso(id){
   const row=all.find(r=>String(r.id)===String(id));if(!row)return;
-  const nuovoStato=!row.rinnovoSospeso;
+  if(row.rinnovoSospeso){
+    // Sta riprendendo → apre il modale Rinnova così l'utente sceglie la nuova data
+    // confirmRenew si occuperà di salvare la nuova scadenza;
+    // al termine dobbiamo anche rimettere rinnovo_sospeso=false
+    openRenew(id, true); // true = "riprendi dopo conferma"
+    return;
+  }
+  // Sta sospendendo → aggiorna solo il flag
   try{
-    const{error}=await db.from('scadenze').update({rinnovo_sospeso:nuovoStato}).eq('id',id);
+    const{error}=await db.from('scadenze').update({rinnovo_sospeso:true}).eq('id',id);
     if(error){showToast('Errore',traduciErrore(error.message));return;}
-    showToast(nuovoStato?'Sospeso':'Ripreso', nuovoStato?'Rinnovo automatico sospeso.':'Rinnovo automatico ripreso.');
+    showToast('Sospeso','Rinnovo automatico sospeso.');
     await carica();
   }catch(e){showToast('Errore',traduciErrore(e.message));}
 }
