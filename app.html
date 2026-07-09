@@ -251,7 +251,7 @@
   <div class="controls">
     <div class="field">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-4.3-4.3"/><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/></svg>
-      <input id="q" placeholder="Cerca per descrizione, categoria o sotto-categoria…" autocomplete="off" />
+      <input id="q" placeholder="Cerca per descrizione, categoria o sotto-categoria…" autocomplete="off" list="dlCerca" />
       <datalist id="dlCerca"></datalist>
     </div>
     <div class="field" style="position:relative;padding:0">
@@ -468,7 +468,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.1 — 09/07/2026';
+const APP_VERSION = 'v1.0 — 09/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
