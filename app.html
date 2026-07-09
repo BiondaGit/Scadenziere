@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+  <title>Scadenziere</title>
+  <meta name="theme-color" content="#0B0F14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Scadenziere">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#0b1020;--panel:#0f1733;--card:#121c3d;--text:#e8ecff;--muted:#aab2d5;
+      --line:rgba(255,255,255,.09);--accent:#6ea8ff;--accent2:#7cf0c2;
+      --danger:#ff6b6b;--warning:#ffd166;
+      --shadow:0 12px 28px rgba(0,0,0,.35);--radius:16px;--radius2:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:radial-gradient(1200px 700px at 20% 0%,rgba(110,168,255,.18),transparent 60%),
+                 radial-gradient(900px 600px at 90% 10%,rgba(124,240,194,.16),transparent 55%),
+                 var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 18px 34px}
+    .topbar{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;
+      padding:18px;border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      border-radius:var(--radius2);box-shadow:var(--shadow);
+      position:sticky;top:10px;z-index:5;backdrop-filter:blur(10px);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background:radial-gradient(circle at 30% 30%,rgba(110,168,255,.95),rgba(124,240,194,.85));
+      box-shadow:0 10px 20px rgba(0,0,0,.35);
+    }
+    h1{font-size:18px;margin:0;line-height:1.1}
+    .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .btn{
+      appearance:none;border:1px solid var(--line);color:var(--text);
+      background:rgba(255,255,255,.04);padding:10px 12px;border-radius:14px;
+      cursor:pointer;display:inline-flex;align-items:center;gap:10px;font-size:14px;
+      transition:transform .08s ease,background .15s ease,border-color .15s ease,opacity .15s ease;
+      user-select:none;
+    }
+    .btn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:rgba(110,168,255,.18);border-color:rgba(110,168,255,.35)}
+    .btn.primary:hover{background:rgba(110,168,255,.24)}
+    .btn.danger{background:rgba(255,107,107,.16);border-color:rgba(255,107,107,.35)}
+    .btn.danger:hover{background:rgba(255,107,107,.22)}
+    .btn.ghost{background:transparent}
+    .btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+    .icon{width:18px;height:18px;display:inline-block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.25))}
+    .controls{margin-top:16px;display:grid;grid-template-columns:1fr 180px 160px 160px;gap:12px}
+    .field{
+      border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);
+      padding:10px 12px;display:flex;gap:10px;align-items:center;
+    }
+    .field input,.field select{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}
+    .field input::placeholder{color:rgba(232,236,255,.45)}
+    .chip{
+      font-size:12px;color:var(--muted);border:1px solid var(--line);padding:7px 10px;
+      border-radius:999px;background:rgba(255,255,255,.02);
+      display:inline-flex;gap:8px;align-items:center;justify-content:center;
+    }
+    #filtriPopover{position:absolute;top:52px;right:0;width:min(520px,calc(100vw - 36px));z-index:30}
+    .filtersCard{
+      border:1px solid var(--line);border-radius:18px;
+      background:linear-gradient(180deg,rgba(18,28,61,.98),rgba(15,23,51,.98));
+      box-shadow:var(--shadow);padding:12px;
+    }
+    .filtersGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .fgrp{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.03)}
+    .fgrp label{display:block;font-size:11px;color:rgba(232,236,255,.62);text-transform:uppercase;letter-spacing:.05em}
+    .fgrp input,.fgrp select,.fgrp textarea{margin-top:6px;width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
+    .fgrp textarea{min-height:84px;resize:vertical}
+    .modalFoot{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .card{
+      margin-top:14px;border:1px solid var(--line);border-radius:var(--radius2);
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      box-shadow:var(--shadow);overflow:hidden;
+    }
+    table{width:100%;border-collapse:collapse}
+    thead th{
+      text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+      color:rgba(232,236,255,.70);padding:14px;border-bottom:1px solid var(--line);
+      background:rgba(0,0,0,.12);
+    }
+    tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:15px;line-height:1.2}
+    tbody tr:not(.row-overdue):not(.row-due):not(.row-active):hover{background:rgba(255,255,255,.03)}
+    .cell-muted{color:var(--muted);font-size:13px}
+    .descTitle,.descSub{margin:0;padding:0}
+    tbody tr.row-overdue>td{background:rgba(160,60,60,.22)!important}
+    tbody tr.row-due>td{background:rgba(170,130,60,.18)!important}
+    tbody tr.row-overdue>td:first-child,tbody tr.row-due>td:first-child{border-top-left-radius:14px;border-bottom-left-radius:14px}
+    tbody tr.row-overdue>td:last-child,tbody tr.row-due>td:last-child{border-top-right-radius:14px;border-bottom-right-radius:14px}
+    tr.row-active td{outline:2px solid rgba(255,255,255,.18);outline-offset:-2px;background:rgba(255,255,255,.03)}
+    tr.row-active-edit td{outline:2px solid rgba(110,168,255,.35);outline-offset:-2px;background:rgba(110,168,255,.06)}
+    tr.row-active-delete td{outline:2px solid rgba(255,107,107,.35);outline-offset:-2px;background:rgba(255,107,107,.08)}
+    tr.details-row td{padding:0;border-bottom:0}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,.10)}
+    .pill.danger{background:rgba(255,107,107,.20);color:#ffd6d6}
+    .pill.warn{background:rgba(255,180,84,.22);color:#ffe0b3}
+    .moreBtn{
+      border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
+      border-radius:12px;padding:8px 10px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-size:13px;
+    }
+    .renewBtn{
+      border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
+      border-radius:12px;padding:8px 10px;cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:13px;
+    }
+    .renewBtn:hover,.moreBtn:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14)}
+    .details{display:none;padding:12px 14px 14px;background:rgba(0,0,0,.10);border-bottom:1px solid var(--line)}
+    .detailsGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .kv{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.02)}
+    .k{font-size:11px;color:rgba(232,236,255,.62);text-transform:uppercase;letter-spacing:.05em}
+    .v{margin-top:4px;font-size:14px;color:rgba(232,236,255,.92);word-break:break-word}
+    th.sortable{cursor:pointer;user-select:none;touch-action:manipulation}
+    th.sortable .sort-indicator{display:inline-block;width:1em;text-align:center;opacity:.75;font-size:12px}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+    .modal{
+      background:linear-gradient(180deg,rgba(18,28,61,.99),rgba(11,16,32,.99));
+      border:1px solid var(--line);border-radius:var(--radius2);
+      width:min(640px,100%);max-height:calc(100vh - 32px);
+      display:flex;flex-direction:column;box-shadow:var(--shadow);
+    }
+    .modalHead{padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .modalHead h2{margin:0;font-size:17px}
+    .modalBody{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .x{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:13px}
+    .x:hover{background:rgba(255,255,255,.07)}
+    .toast{
+      position:fixed;right:18px;bottom:18px;padding:12px 14px;border-radius:16px;
+      border:1px solid var(--line);background:rgba(15,23,51,.95);
+      box-shadow:var(--shadow);display:none;max-width:min(520px,calc(100% - 36px));z-index:60
+    }
+    .toast .tTitle{font-weight:700;font-size:14px}
+    .toast .tMsg{margin-top:4px;color:var(--muted);font-size:13px}
+    .loading{opacity:.6;pointer-events:none}
+    input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}
+    .rememberRow{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.92);font-weight:600;font-size:14px}
+    #pastDateBackdrop{z-index:9999!important}
+
+    /* ── Tema chiaro ── */
+    body.tema-chiaro {
+      --bg:#f0f2f8;--panel:#e4e7f0;--card:#dde0ed;--text:#1a1d2e;--muted:#5a6080;
+      --line:rgba(0,0,0,.10);--accent:#4a7ee8;--accent2:#1aab7a;
+      --danger:#d94f4f;--warning:#c8960a;
+      --shadow:0 8px 24px rgba(0,0,0,.12);
+    }
+    body.tema-chiaro .topbar{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.7));}
+    body.tema-chiaro .modal{background:linear-gradient(180deg,rgba(240,242,248,.99),rgba(228,231,240,.99));}
+    body.tema-chiaro .filtersCard{background:linear-gradient(180deg,rgba(240,242,248,.98),rgba(228,231,240,.98));}
+    body.tema-chiaro .field input,.field select,.fgrp input,.fgrp select,.fgrp textarea{color:var(--text);}
+    body.tema-chiaro .toast{background:rgba(240,242,248,.97);}
+
+    /* ── Modale Impostazioni ── */
+    .settSection{margin-bottom:18px}
+    .settSection h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+    .settRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);margin-bottom:8px}
+    .settRowLabel{font-size:14px;color:var(--text)}
+    .settRowSub{font-size:12px;color:var(--muted);margin-top:2px}
+    .temaBtn{
+      appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.04);
+      color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;
+      transition:background .15s,border-color .15s;
+    }
+    .temaBtn.active{background:rgba(110,168,255,.22);border-color:rgba(110,168,255,.45);color:var(--accent)}
+    .temaBtn:hover:not(.active){background:rgba(255,255,255,.07)}
+    .temaBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .settInput{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}
+    .pwdRow{display:grid;gap:10px}
+    @media(max-width:860px){
+      .controls{grid-template-columns:1fr}
+      .actions{justify-content:flex-start}
+      #filtriPopover{left:0;right:auto}
+      .filtersGrid{grid-template-columns:1fr}
+    }
+    @media(max-width:1020px){.detailsGrid{grid-template-columns:1fr 1fr}}
+    @media(max-width:720px){.formGrid{grid-template-columns:1fr}}
+    @media(max-width:900px),(pointer:coarse){
+      body{font-size:16px}
+      button,.btn{font-size:16px;padding:14px 16px;border-radius:14px}
+      input,select,textarea{font-size:16px}
+      .card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      table{min-width:520px}
+      thead th{font-size:11px;padding:12px 8px;white-space:nowrap}
+      tbody td{font-size:15px;padding:10px 8px;line-height:1.35}
+      .moreBtn{display:block!important;width:100%!important;padding:13px 4px!important;text-align:center!important;border-radius:10px!important;font-size:13px!important;margin-bottom:5px!important}
+      .renewBtn{display:block!important;width:100%!important;padding:13px 4px!important;text-align:center!important;border-radius:10px!important;font-size:13px!important}
+      .toast{right:12px;left:12px;bottom:12px;max-width:none;border-radius:14px}
+      #filtriPopover{left:0;right:0;top:50px;width:100%}
+      .filtersGrid{grid-template-columns:1fr}
+      .backdrop{padding:12px}
+      .modal{border-radius:18px;max-height:calc(100vh - 24px)}
+      .modalBody{padding:14px}
+      .modalHead{padding:14px}
+      .modalFoot{padding:12px 14px;gap:8px}
+      .modalFoot .btn{flex:1;justify-content:center;min-height:48px!important;font-size:16px}
+      .formGrid{grid-template-columns:1fr}
+      .fgrp{padding:12px 14px;border-radius:14px}
+      .detailsGrid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div><h1>Scadenziere</h1><div class="sub" id="nomeGruppo">—</div></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btnInserisci">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Inserisci
+      </button>
+      <button class="btn" id="btnModifica" disabled>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Modifica
+      </button>
+      <button class="btn danger" id="btnElimina" disabled>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Elimina
+      </button>
+      <button class="btn" id="btnEsci">Esci</button>
+      <button class="btn" id="btnImpostazioni" title="Impostazioni utente">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="field">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-4.3-4.3"/><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/></svg>
+      <input id="q" placeholder="Cerca per descrizione, categoria o sotto-categoria…" />
+    </div>
+    <div class="field" style="position:relative;padding:0">
+      <button class="btn" id="btnFiltri" type="button" style="width:100%;justify-content:center;border:0;background:transparent">Filtri</button>
+      <div id="filtriPopover" style="display:none">
+        <div class="filtersCard">
+          <div class="filtersGrid">
+            <div class="fgrp"><label>Categoria</label><select id="fCategoria"><option value="">Tutte</option></select></div>
+            <div class="fgrp"><label>Sotto categoria</label><select id="fSottoCategoria"><option value="">Tutte</option></select></div>
+            <div class="fgrp"><label>Data da</label><input id="fDataDa" type="date" /></div>
+            <div class="fgrp"><label>Data a</label><input id="fDataA" type="date" /></div>
+          </div>
+          <div class="fgrp" style="margin-top:10px"><label>Stato</label>
+            <select id="fStato"><option value="">Tutti</option><option value="overdue">Solo scadute</option><option value="due">Solo in scadenza</option><option value="ok">Solo ok</option></select>
+          </div>
+          <div class="fgrp" style="margin-top:10px"><label>Ricorrenza</label>
+            <select id="fRicorrenza"><option value="">Tutte</option><option value="only">Solo ricorrenti</option><option value="no">Solo non ricorrenti</option></select>
+          </div>
+          <div class="fgrp" style="margin-top:10px"><label>Entro</label>
+            <div style="display:flex;gap:8px">
+              <input id="fEntroVal" type="number" min="0" step="1" placeholder="Es. 7" style="flex:1" />
+              <select id="fEntroUnit" style="width:120px"><option value="days">Giorni</option><option value="months">Mesi</option><option value="years">Anni</option></select>
+            </div>
+          </div>
+          <div class="fgrp" style="margin-top:10px"><label>Ordina per</label>
+            <select id="fSort">
+              <option value="priority">Priorità</option><option value="dateAsc">Data ↑</option><option value="dateDesc">Data ↓</option>
+              <option value="cat">Categoria ↑</option><option value="catDesc">Categoria ↓</option>
+              <option value="descAsc">Descrizione ↑</option><option value="descDesc">Descrizione ↓</option>
+              <option value="prevAsc">Preavviso ↑</option><option value="prevDesc">Preavviso ↓</option>
+            </select>
+          </div>
+          <div class="modalFoot" style="padding:10px 0 0;border-top:0">
+            <button class="btn" id="btnResetFiltri" type="button">Reset</button>
+            <button class="btn primary" id="btnApplicaFiltri" type="button">Applica</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chip" id="count">0 eventi</div>
+    <button class="btn" id="btnExportCsv" title="Esporta in CSV">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Esporta CSV
+    </button>
+  </div>
+
+  <div class="card" id="tableCard">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:44px">Sel</th>
+          <th id="thDescrizione" class="sortable">Descrizione <span class="sort-indicator"></span></th>
+          <th style="width:160px" id="thCategoria" class="sortable">Categoria <span class="sort-indicator"></span></th>
+          <th style="width:170px" id="thScadenza" class="sortable">Scadenza <span class="sort-indicator"></span></th>
+          <th style="width:150px" id="thPreavviso" class="sortable">Preavviso <span class="sort-indicator"></span></th>
+          <th>Stato</th>
+          <th style="width:90px">Dettagli</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: data nel passato -->
+<div class="backdrop" id="pastDateBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" style="width:min(560px,100%)">
+    <div class="modalHead"><h2>Conferma</h2><button class="x" id="pastDateClose">Chiudi</button></div>
+    <div class="modalBody"><div class="cell-muted" id="pastDateText">La data di scadenza inserita è già passata. Vuoi procedere comunque?</div></div>
+    <div class="modalFoot"><button class="btn" id="pastDateCancel">Annulla</button><button class="btn primary" id="pastDateOk">Procedi</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Inserisci / Modifica -->
+<div class="backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <div class="modalHead"><h2 id="modalTitle">Nuova scadenza</h2><button class="x" id="modalClose">Chiudi</button></div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="fgrp"><label>Categoria *</label><input id="mCategoria" placeholder="Es. Auto" list="dlCategoria" /></div>
+        <div class="fgrp"><label>Sotto categoria</label><input id="mSottoCategoria" placeholder="Es. Assicurazione" list="dlSottoCategoria" /></div>
+        <div class="fgrp"><label>Descrizione *</label><input id="mDescrizione" placeholder="Es. Panda DY524CX" list="dlDescrizione" /></div>
+        <div class="fgrp"><label>Scadenza *</label><input id="mScadenza" type="date" /></div>
+        <div class="fgrp"><label>Ricorrenza</label>
+          <select id="mRicorrenza">
+            <option value="NESSUNA">Nessuna</option><option value="GIORNALIERA">Giornaliera</option>
+            <option value="X_GIORNI">Ogni X giorni</option><option value="SETTIMANALE">Settimanale</option>
+            <option value="X_SETTIMANE">Ogni X settimane</option><option value="MENSILE">Mensile</option>
+            <option value="X_MESI">Ogni X mesi</option><option value="ANNUALE">Annuale</option>
+            <option value="X_ANNI">Ogni X anni</option>
+          </select>
+        </div>
+        <div class="fgrp" id="grpOgniX" style="display:none"><label id="lblOgniX">Ogni X mesi</label><input id="mOgniX" type="number" min="2" step="1" placeholder="Es. 3" /></div>
+        <div class="fgrp" id="grpRinnovoAuto" style="display:none"><label>Rinnovo automatico</label>
+          <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
+        </div>
+        <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
+        <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
+      </div>
+      <div class="cell-muted" style="margin-top:10px">
+        <strong>Nota:</strong> Email gruppo e email utente vengono aggiunte automaticamente. Le email extra sono destinatari aggiuntivi facoltativi.
+      </div>
+    </div>
+    <div class="modalFoot"><button class="btn" id="modalCancel">Annulla</button><button class="btn primary" id="modalConfirm">Conferma</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Elimina -->
+<div class="backdrop" id="confirmBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" style="width:min(560px,100%)">
+    <div class="modalHead"><h2>Conferma eliminazione</h2><button class="x" id="confirmClose">Chiudi</button></div>
+    <div class="modalBody">
+      <div id="confirmText" class="cell-muted">Stai per eliminare l'evento selezionato.</div>
+      <div class="cell-muted" style="margin-top:10px">Per procedere, conferma con il pulsante qui sotto.</div>
+    </div>
+    <div class="modalFoot"><button class="btn" id="confirmCancel">Annulla</button><button class="btn danger" id="confirmOk">Sì, elimina</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Rinnova -->
+<div class="backdrop" id="renewBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" style="width:min(620px,100%)">
+    <div class="modalHead"><h2>Rinnova</h2><button class="x" id="renewClose">Chiudi</button></div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="fgrp"><label>Nuova scadenza *</label><input id="rScadenza" type="date" /></div>
+        <div class="fgrp"><label>Scadenza attuale</label><input id="rOldScadenza" type="text" readonly /></div>
+        <div class="fgrp"><label>Regola</label><input id="rRule" type="text" readonly /></div>
+        <div class="fgrp" style="grid-column:1/-1"><label>Note (sostituzione)</label><textarea id="rNote" placeholder="Inserisci le note aggiornate…"></textarea></div>
+      </div>
+      <div class="cell-muted" style="margin-top:10px"><strong>Nota:</strong> Il rinnovo mantiene lo stesso ID e aggiorna solo Scadenza e Note.</div>
+    </div>
+    <div class="modalFoot"><button class="btn" id="renewCancel">Annulla</button><button class="btn primary" id="renewOk">Conferma rinnovo</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Impostazioni utente -->
+<div class="backdrop" id="settBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" style="width:min(560px,100%)">
+    <div class="modalHead">
+      <h2>Impostazioni</h2>
+      <button class="x" id="settClose">Chiudi</button>
+    </div>
+    <div class="modalBody" autocomplete="off">
+
+      <!-- Info utente (readonly) -->
+      <div class="settSection">
+        <h3>Profilo</h3>
+        <div class="settRow">
+          <div><div class="settRowLabel">Nome</div></div>
+          <input class="settInput" id="settNome" type="text" style="text-align:right;max-width:200px" placeholder="Il tuo nome" autocomplete="new-password" />
+        </div>
+        <div class="settRow">
+          <div><div class="settRowLabel">Email</div><div class="settRowSub">Login — non modificabile</div></div>
+          <span id="settEmail" style="font-size:14px;color:var(--muted)">—</span>
+        </div>
+        <div class="settRow">
+          <div><div class="settRowLabel">Gruppo</div></div>
+          <span id="settGruppo" style="font-size:14px;color:var(--muted)">—</span>
+        </div>
+        <div class="settRow">
+          <div><div class="settRowLabel">Ultimo accesso</div></div>
+          <span id="settUltimoAccesso" style="font-size:13px;color:var(--muted)">—</span>
+        </div>
+      </div>
+
+      <!-- Tema -->
+      <div class="settSection">
+        <h3>Tema</h3>
+        <div class="settRow" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <div class="settRowLabel">Aspetto dell'interfaccia</div>
+          <div class="temaBtns">
+            <button class="temaBtn" data-tema="scuro">🌙 Scuro</button>
+            <button class="temaBtn" data-tema="chiaro">☀️ Chiaro</button>
+            <button class="temaBtn" data-tema="sistema">💻 Sistema</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cambio password -->
+      <div class="settSection">
+        <h3>Sicurezza</h3>
+        <div class="settRow" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <div class="settRowLabel">Cambia password</div>
+          <div class="pwdRow" style="width:100%">
+            <div class="fgrp"><label>Nuova password</label><input class="settInput" id="settPwd1" type="password" placeholder="Minimo 6 caratteri" autocomplete="new-password" /></div>
+            <div class="fgrp"><label>Conferma password</label><input class="settInput" id="settPwd2" type="password" placeholder="Ripeti la nuova password" autocomplete="new-password" /></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modalFoot">
+      <button class="btn" id="settCancel">Annulla</button>
+      <button class="btn primary" id="settSalva">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="tTitle" id="toastTitle">Ok</div><div class="tMsg" id="toastMsg">Operazione completata.</div></div>
+
+<datalist id="dlCategoria"></datalist>
+<datalist id="dlSottoCategoria"></datalist>
+<datalist id="dlDescrizione"></datalist>
+<datalist id="dlEmail"></datalist>
+
+<script>
+const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let all=[], view=[], selectedId=null, mode='create', renewId=null;
+// let renewRiprendi=false;
+let activeRowId=null, originalEdit=null, _pastDateContinue=null;
+let utenteCorrente=null, gruppoCorrente=null;
+
+async function avvia() {
+  const { data:{ session } } = await db.auth.getSession();
+  if (!session) { window.location.href='index.html'; return; }
+
+  // Redirect automatico se la sessione scade mentre l'utente è sulla pagina
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
+      window.location.href = 'index.html';
+    }
+  });
+
+  const { data:utente, error } = await db.from('utenti').select('*,gruppi(*)').eq('id',session.user.id).single();
+
+  // Se il profilo non è leggibile, o leggibile ma il gruppo non è attivo (gestito da RLS),
+  // l'utente non può proseguire — caso più probabile: gruppo sospeso nel frattempo
+  if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+utenteCorrente=utente; gruppoCorrente=utente.gruppi;
+  if (error||!utente) { showToast('Errore','Profilo utente non trovato.'); return; }
+  utenteCorrente=utente; gruppoCorrente=utente.gruppi;
+  document.getElementById('nomeGruppo').textContent=gruppoCorrente?.nome||'';
+
+  // Applica tema salvato
+  applicaTema(utente.tema||'scuro');
+
+  await db.from('utenti').update({ultimo_accesso:new Date().toISOString()}).eq('id',session.user.id);
+  await carica(); wireUiOnce();
+}
+  
+// Verifica che il gruppo sia ancora attivo. Se non lo è, blocca l'utente con messaggio chiaro.
+async function verificaGruppoAttivo() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return false;
+
+  const { data: utente, error } = await db.from('utenti').select('id,gruppi(attivo)').eq('id', session.user.id).single();
+  if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return false;
+  }
+  return true;
+}
+async function carica() {
+  setLoading(true);
+  const { data, error } = await db
+    .from('scadenze')
+    .select('id,categoria,sotto_categoria,descrizione,scadenza,preavviso_giorni,ricorrenza,ogni_x,rinnovo_auto,rinnovo_sospeso,note,eliminato,scadenze_destinatari(email,tipo)')
+    .eq('eliminato',false)
+    .order('scadenza',{ascending:true});
+  setLoading(false);
+  if (error) { showToast('Errore','Impossibile caricare le scadenze.'); return; }
+  all=(data||[]).map(r=>{
+    // Estrai solo le email extra (tipo='extra') — gruppo e utente sono automatici
+    const dest=r.scadenze_destinatari||[];
+    const extras=dest.filter(d=>d.tipo==='extra').map(d=>d.email);
+    const row={
+      id:r.id, categoria:r.categoria||'', sottoCategoria:r.sotto_categoria||'',
+      descrizione:r.descrizione||'', scadenzaISO:r.scadenza||'', scadenzaIT:isoToIt(r.scadenza),
+      preavviso:r.preavviso_giorni??0, ricorrenza:r.ricorrenza||'NESSUNA',
+      ogniX:r.ogni_x||'', rinnovoAuto:r.rinnovo_auto===true, rinnovoSospeso:r.rinnovo_sospeso===true, note:r.note||'',
+      emails: extras, // array di email extra
+    };
+    row.status=computeStatus(row); return row;
+  });
+  popolaAutocomplete(); applyFilters();
+}
+
+function isoToIt(iso){ if(!iso)return''; const[y,m,d]=iso.split('-'); return`${d}/${m}/${y}`; }
+function computeStatus(row){
+  if(!row.scadenzaISO)return'ok';
+  const d=new Date(row.scadenzaISO+'T00:00:00'); if(isNaN(d))return'ok';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const diff=Math.floor((d-today)/86400000);
+  if(diff<0)return'overdue'; if(diff<=Number(row.preavviso??0))return'due'; return'ok';
+}
+function isPastDate(iso){ if(!iso)return false; const d=new Date(iso+'T00:00:00'); const t=new Date(); t.setHours(0,0,0,0); return d<t; }
+
+function calcolaProssimaScadenza(iso,ricorrenza,ogniX){
+  // iso è sempre in formato YYYY-MM-DD
+  const parts=iso.split('-');
+  let [yy,mm,dd]=[Number(parts[0]),Number(parts[1])-1,Number(parts[2])];
+  const d=new Date(Date.UTC(yy,mm,dd));
+  const r=String(ricorrenza||'NESSUNA').toUpperCase();
+  const x=Number(ogniX)||1;
+  if(r==='NESSUNA')return iso;
+  if(r==='GIORNALIERA'){d.setDate(d.getDate()+1);}
+  else if(r==='X_GIORNI'){d.setDate(d.getDate()+x);}
+  else if(r==='SETTIMANALE'){d.setDate(d.getDate()+7);}
+  else if(r==='X_SETTIMANE'){d.setDate(d.getDate()+x*7);}
+  else if(r==='MENSILE'){addMesiSafe(d,1);}
+  else if(r==='X_MESI'){addMesiSafe(d,x);}
+  else if(r==='ANNUALE'){addMesiSafe(d,12);}
+  else if(r==='X_ANNI'){addMesiSafe(d,x*12);}
+  yy=d.getUTCFullYear();
+  mm=String(d.getUTCMonth()+1).padStart(2,'0');
+  dd=String(d.getUTCDate()).padStart(2,'0');
+  return`${yy}-${mm}-${dd}`;
+}
+function addMesiSafe(d,mesi){
+  // d è sempre un oggetto Date costruito con Date.UTC — operiamo tutto in UTC
+  const day=d.getUTCDate();
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth()+mesi);
+  const last=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();
+  d.setUTCDate(Math.min(day,last));
+}
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML=''; const frag=document.createDocumentFragment();
+  view.forEach(row=>{
+    const tr=document.createElement('tr'); tr.dataset.rowid=String(row.id);
+    const tdSel=document.createElement('td'); const cb=document.createElement('input'); cb.type='checkbox'; cb.name='selRow'; cb.value=row.id; tdSel.appendChild(cb);
+    const tdDesc=document.createElement('td'); tdDesc.innerHTML=`<div class="descTitle">${escapeHtml(row.descrizione)}</div>${row.sottoCategoria?`<div class="descSub cell-muted">${escapeHtml(row.sottoCategoria)}</div>`:''}`;
+    const tdCat=document.createElement('td'); tdCat.innerHTML=`<div>${escapeHtml(row.categoria)}</div>`;
+    const tdScad=document.createElement('td'); tdScad.innerHTML=`<div>${escapeHtml(row.scadenzaIT)}</div>`;
+    const tdPrev=document.createElement('td'); tdPrev.innerHTML=`<div>${row.preavviso??0} <span class="cell-muted">giorni</span></div>`;
+    const tdStato=document.createElement('td');
+    if(row.status==='overdue')tdStato.innerHTML='<span class="pill danger">Scaduta</span>';
+    else if(row.status==='due')tdStato.innerHTML='<span class="pill warn">In scadenza</span>';
+    else tdStato.innerHTML='<span class="cell-muted">—</span>';
+    if(row.rinnovoAuto&&row.rinnovoSospeso){
+      tdStato.innerHTML+=' <span class="pill" style="background:rgba(255,209,102,.15);color:#ffd166;border-color:rgba(255,209,102,.3)">⏸ Sospeso</span>';
+    }
+    const tdMore=document.createElement('td');
+    const ric=String(row.ricorrenza||'NESSUNA').toUpperCase();
+    if(ric!=='NESSUNA'&&!row.rinnovoAuto){
+      const rb=document.createElement('button');rb.className='renewBtn';rb.title='Rinnova';rb.textContent='↻';rb.dataset.action='renew';rb.dataset.rowid=String(row.id);tdMore.appendChild(rb);
+    }
+    if(ric!=='NESSUNA'&&row.rinnovoAuto){
+      const sb=document.createElement('button');
+      sb.className='renewBtn';
+      sb.title=row.rinnovoSospeso?'Riprendi rinnovo automatico':'Sospendi rinnovo automatico';
+      sb.textContent=row.rinnovoSospeso?'▶':'⏸';
+      sb.dataset.action='toggleSospeso';
+      sb.dataset.rowid=String(row.id);
+      tdMore.appendChild(sb);
+    }
+    const dupBtn=document.createElement('button');dupBtn.className='renewBtn';dupBtn.title='Duplica';dupBtn.textContent='⧉';dupBtn.dataset.action='duplicate';dupBtn.dataset.rowid=String(row.id);tdMore.appendChild(dupBtn);
+    const btn=document.createElement('button');btn.className='moreBtn';btn.textContent='+ Info';btn.dataset.action='toggleInfo';btn.dataset.rowid=String(row.id);tdMore.appendChild(btn);
+    tr.append(tdSel,tdDesc,tdCat,tdScad,tdPrev,tdStato,tdMore);
+    tr.classList.toggle('row-overdue',row.status==='overdue');
+    tr.classList.toggle('row-due',row.status==='due');
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+  document.getElementById('count').textContent=`${view.length} eventi`;
+}
+
+function applyFilters(){
+  const q=(document.getElementById('q')?.value||'').trim().toLowerCase();
+  const cat=(document.getElementById('fCategoria')?.value||'').trim();
+  const sub=(document.getElementById('fSottoCategoria')?.value||'').trim();
+  const da=document.getElementById('fDataDa')?.value||'';
+  const a=document.getElementById('fDataA')?.value||'';
+  const stato=document.getElementById('fStato')?.value||'';
+  const fRic=document.getElementById('fRicorrenza')?.value||'';
+  const entroVal=Number(document.getElementById('fEntroVal')?.value||0);
+  const entroUnit=document.getElementById('fEntroUnit')?.value||'days';
+  const sortMode=document.getElementById('fSort')?.value||'priority';
+  view=all.filter(r=>{
+    if(cat&&r.categoria!==cat)return false;
+    if(sub&&r.sottoCategoria!==sub)return false;
+    if(da&&(!r.scadenzaISO||r.scadenzaISO<da))return false;
+    if(a&&(!r.scadenzaISO||r.scadenzaISO>a))return false;
+    if(stato&&r.status!==stato)return false;
+    if(fRic==='only'&&String(r.ricorrenza||'NESSUNA').toUpperCase()==='NESSUNA')return false;
+    if(fRic==='no'&&String(r.ricorrenza||'NESSUNA').toUpperCase()!=='NESSUNA')return false;
+    if(q){const hay=`${r.descrizione} ${r.categoria} ${r.sottoCategoria}`.toLowerCase();if(!hay.includes(q))return false;}
+    if(Number.isFinite(entroVal)&&entroVal>0){
+      if(!r.scadenzaISO)return false;
+      const now=new Date();now.setHours(0,0,0,0);const limit=new Date(now);
+      if(entroUnit==='days')limit.setDate(limit.getDate()+entroVal);
+      if(entroUnit==='months')limit.setMonth(limit.getMonth()+entroVal);
+      if(entroUnit==='years')limit.setFullYear(limit.getFullYear()+entroVal);
+      const d=new Date(r.scadenzaISO+'T00:00:00');
+      if(d<now||d>limit)return false;
+    }
+    return true;
+  });
+  const pr={overdue:0,due:1,ok:2};
+  if(sortMode==='priority'){view.sort((a,b)=>{const pa=pr[a.status]??9,pb=pr[b.status]??9;if(pa!==pb)return pa-pb;return(a.scadenzaISO||'').localeCompare(b.scadenzaISO||'');});}
+  else if(sortMode==='dateAsc'){view.sort((a,b)=>(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}
+  else if(sortMode==='dateDesc'){view.sort((a,b)=>(b.scadenzaISO||'').localeCompare(a.scadenzaISO||''));}
+  else if(sortMode==='cat'){view.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}
+  else if(sortMode==='catDesc'){view.sort((a,b)=>(b.categoria||'').localeCompare(a.categoria||'')||(a.scadenzaISO||'').localeCompare(b.scadenzaISO||''));}
+  else if(sortMode==='descAsc'){view.sort((a,b)=>(a.descrizione||'').localeCompare(b.descrizione||''));}
+  else if(sortMode==='descDesc'){view.sort((a,b)=>(b.descrizione||'').localeCompare(a.descrizione||''));}
+  else if(sortMode==='prevAsc'){view.sort((a,b)=>(Number(a.preavviso)||0)-(Number(b.preavviso)||0));}
+  else if(sortMode==='prevDesc'){view.sort((a,b)=>(Number(b.preavviso)||0)-(Number(a.preavviso)||0));}
+  clearSelection(); render(); updateHeaderIndicators(); updateFiltriBadge();
+}
+
+function updateFiltriBadge(){
+  const cat=document.getElementById('fCategoria')?.value||'';
+  const sub=document.getElementById('fSottoCategoria')?.value||'';
+  const da=document.getElementById('fDataDa')?.value||'';
+  const a=document.getElementById('fDataA')?.value||'';
+  const stato=document.getElementById('fStato')?.value||'';
+  const fRic=document.getElementById('fRicorrenza')?.value||'';
+  const entroVal=document.getElementById('fEntroVal')?.value||'';
+  let n=0;
+  if(cat)n++; if(sub)n++; if(da)n++; if(a)n++; if(stato)n++; if(fRic)n++; if(entroVal)n++;
+  const btn=document.getElementById('btnFiltri');
+  btn.textContent=n>0?`Filtri (${n})`:'Filtri';
+}
+
+function updateHeaderIndicators(){
+  document.querySelectorAll('th.sortable .sort-indicator').forEach(s=>s.textContent='');
+  const s=document.getElementById('fSort')?.value||'priority';
+  const map={dateAsc:['thScadenza','↑'],dateDesc:['thScadenza','↓'],cat:['thCategoria','↑'],catDesc:['thCategoria','↓'],descAsc:['thDescrizione','↑'],descDesc:['thDescrizione','↓'],prevAsc:['thPreavviso','↑'],prevDesc:['thPreavviso','↓']};
+  if(map[s]){const el=document.getElementById(map[s][0])?.querySelector('.sort-indicator');if(el)el.textContent=map[s][1];}
+}
+function cycleSortTh(thId,asc,desc){const fSort=document.getElementById('fSort');const cur=fSort?.value||'priority';if(cur!==asc&&cur!==desc)fSort.value=asc;else if(cur===asc)fSort.value=desc;else fSort.value='priority';applyFilters();}
+function setSelection(id){selectedId=id;document.getElementById('btnModifica').disabled=false;document.getElementById('btnElimina').disabled=false;}
+function clearSelection(){selectedId=null;document.querySelectorAll('input[name="selRow"]').forEach(cb=>cb.checked=false);document.getElementById('btnModifica').disabled=true;document.getElementById('btnElimina').disabled=true;}
+function setActiveRow(id){clearActiveRow();activeRowId=id;const cb=document.querySelector(`input[name="selRow"][value="${CSS.escape(String(id))}"]`);if(cb?.closest('tr'))cb.closest('tr').classList.add('row-active');}
+function clearActiveRow(){document.querySelectorAll('tr.row-active,tr.row-active-edit,tr.row-active-delete').forEach(tr=>tr.classList.remove('row-active','row-active-edit','row-active-delete'));activeRowId=null;}
+function setRowActionClass(action){const tr=document.querySelector('tr.row-active');if(!tr)return;tr.classList.remove('row-active-edit','row-active-delete');if(action==='edit')tr.classList.add('row-active-edit');if(action==='delete')tr.classList.add('row-active-delete');}
+function openModal(){const b=document.getElementById('modalBackdrop');b.style.display='flex';b.setAttribute('aria-hidden','false');}
+function closeModal(){const b=document.getElementById('modalBackdrop');b.style.display='none';b.setAttribute('aria-hidden','true');clearActiveRow();}
+
+function openCreate(){
+  mode='create';originalEdit=null;
+  document.getElementById('modalTitle').textContent='Nuova scadenza';
+  ['mCategoria','mSottoCategoria','mDescrizione','mScadenza','mNote','mEmail1','mEmail2','mEmail3','mEmail4','mEmail5'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('mRicorrenza').value='NESSUNA';
+  document.getElementById('mPreavviso').value='0';
+  document.getElementById('mRinnovoAuto').checked=false;
+  document.getElementById('mOgniX').value='';
+  toggleOgniX();openModal();
+}
+
+function openEdit(){
+  if(!selectedId)return;const row=all.find(r=>String(r.id)===String(selectedId));if(!row)return;
+  mode='edit';document.getElementById('modalTitle').textContent='Modifica scadenza';
+  document.getElementById('mCategoria').value=row.categoria;
+  document.getElementById('mSottoCategoria').value=row.sottoCategoria;
+  document.getElementById('mDescrizione').value=row.descrizione;
+  document.getElementById('mScadenza').value=row.scadenzaISO;
+  document.getElementById('mRicorrenza').value=row.ricorrenza;
+  document.getElementById('mOgniX').value=row.ogniX||'';
+  document.getElementById('mPreavviso').value=row.preavviso??0;
+  document.getElementById('mNote').value=row.note;
+  // Carica le email extra (max 5)
+  for(let i=1;i<=5;i++){
+    document.getElementById(`mEmail${i}`).value=row.emails[i-1]||'';
+  }
+  document.getElementById('mRinnovoAuto').checked=row.rinnovoAuto;
+  originalEdit={...row};toggleOgniX();setActiveRow(selectedId);setRowActionClass('edit');openModal();
+}
+
+  function duplicaScadenza(rowId){
+  const row=all.find(r=>String(r.id)===String(rowId));if(!row)return;
+  openCreate(); // resetta il modale come "Nuova scadenza" e apre
+  document.getElementById('modalTitle').textContent='Duplica scadenza';
+  document.getElementById('mCategoria').value=row.categoria;
+  document.getElementById('mSottoCategoria').value=row.sottoCategoria;
+  document.getElementById('mDescrizione').value=row.descrizione;
+  // mScadenza resta vuoto volutamente: l'utente deve scegliere una nuova data
+  document.getElementById('mRicorrenza').value=row.ricorrenza;
+  document.getElementById('mOgniX').value=row.ogniX||'';
+  document.getElementById('mPreavviso').value=row.preavviso??0;
+  document.getElementById('mNote').value=row.note;
+  for(let i=1;i<=5;i++){
+    document.getElementById(`mEmail${i}`).value=row.emails[i-1]||'';
+  }
+  document.getElementById('mRinnovoAuto').checked=row.rinnovoAuto;
+  toggleOgniX();
+}
+  
+function toggleOgniX(){
+  const val=document.getElementById('mRicorrenza').value;
+  const isX=['X_GIORNI','X_SETTIMANE','X_MESI','X_ANNI'].includes(val);
+  const hasR=val!=='NESSUNA';
+  document.getElementById('grpOgniX').style.display=isX?'block':'none';
+  if(!isX)document.getElementById('mOgniX').value='';
+  const lbl=document.getElementById('lblOgniX');
+  if(lbl){if(val==='X_GIORNI')lbl.textContent='Ogni X giorni';else if(val==='X_SETTIMANE')lbl.textContent='Ogni X settimane';else if(val==='X_ANNI')lbl.textContent='Ogni X anni';else lbl.textContent='Ogni X mesi';}
+  const canAuto=hasR&&!['NESSUNA','GIORNALIERA'].includes(val);
+  document.getElementById('grpRinnovoAuto').style.display=canAuto?'block':'none';
+  const cb=document.getElementById('mRinnovoAuto');
+  if(val==='GIORNALIERA'){cb.checked=true;}else if(!canAuto){cb.checked=false;}
+  const prev=document.getElementById('mPreavviso');
+  if(val==='GIORNALIERA'){prev.value=0;prev.readOnly=true;prev.style.opacity='0.45';}else{prev.readOnly=false;prev.style.opacity='';}
+}
+
+async function confirmModal(){
+  const descrizione=document.getElementById('mDescrizione').value.trim();
+  const categoria=toTitleCase(document.getElementById('mCategoria').value.trim());
+  const scadenza=document.getElementById('mScadenza').value;
+  if(!descrizione||!categoria||!scadenza){showToast('Dati mancanti','Categoria, descrizione e scadenza sono obbligatorie.');return;}
+  // Validazione ogni_x per ricorrenze X_GIORNI, X_SETTIMANE, X_MESI, X_ANNI
+  const ricorrenzaVal=document.getElementById('mRicorrenza').value;
+  const ogniXVal=Number(document.getElementById('mOgniX').value);
+  if(['X_GIORNI','X_SETTIMANE','X_MESI','X_ANNI'].includes(ricorrenzaVal)){
+    const label=ricorrenzaVal==='X_GIORNI'?'giorni':ricorrenzaVal==='X_SETTIMANE'?'settimane':ricorrenzaVal==='X_ANNI'?'anni':'mesi';
+    if(!ogniXVal||ogniXVal<2){showToast('Valore non valido','Per la ricorrenza "Ogni X '+label+'" devi inserire un numero maggiore di 1.');return;}
+  }
+  // Controllo modifiche in modalità edit
+  if(mode==='edit'&&originalEdit){
+    const emailsExtra=[];
+    for(let i=1;i<=5;i++){const v=document.getElementById(`mEmail${i}`).value.trim();if(v)emailsExtra.push(v);}
+    const nessuna=
+      categoria===originalEdit.categoria&&
+      toTitleCase(document.getElementById('mSottoCategoria').value.trim())===originalEdit.sottoCategoria&&
+      descrizione===originalEdit.descrizione&&
+      scadenza===originalEdit.scadenzaISO&&
+      Number(document.getElementById('mPreavviso').value||0)===(originalEdit.preavviso??0)&&
+      document.getElementById('mRicorrenza').value===originalEdit.ricorrenza&&
+      String(document.getElementById('mOgniX').value||'')===String(originalEdit.ogniX||'')&&
+      document.getElementById('mRinnovoAuto').checked===originalEdit.rinnovoAuto&&
+      document.getElementById('mNote').value.trim()===originalEdit.note&&
+      JSON.stringify(emailsExtra)===JSON.stringify(originalEdit.emails);
+    if(nessuna){showToast('Nessuna modifica','Non sono state apportate modifiche.');closeModal();return;}
+  }
+  // Raccoglie le 5 email extra
+  const emailsExtra2=[];
+  for(let i=1;i<=5;i++){
+    const v=document.getElementById(`mEmail${i}`).value.trim();
+    if(v)emailsExtra2.push(v);
+  }
+  const dati={
+    categoria,sotto_categoria:toTitleCase(document.getElementById('mSottoCategoria').value.trim()),
+    descrizione,scadenza,preavviso_giorni:Number(document.getElementById('mPreavviso').value||0),
+    ricorrenza:document.getElementById('mRicorrenza').value,
+    ogni_x:document.getElementById('mOgniX').value?Number(document.getElementById('mOgniX').value):null,
+    rinnovo_auto:document.getElementById('mRinnovoAuto').checked,
+    note:document.getElementById('mNote').value.trim(),
+    emailsExtra:emailsExtra2,
+  };
+  const dateChanged=mode==='create'||(originalEdit&&dati.scadenza!==originalEdit.scadenzaISO);
+  if(dateChanged&&isPastDate(dati.scadenza)){openPastDateConfirm('La data di scadenza inserita è già passata. Vuoi procedere comunque?',()=>doSalva(dati));return;}
+  doSalva(dati);
+}
+
+async function doSalva(dati){
+  document.getElementById('modalConfirm').disabled=true;
+  try{
+    const payload={
+      id_gruppo:gruppoCorrente.id,id_utente:utenteCorrente.id,
+      categoria:dati.categoria,sotto_categoria:dati.sotto_categoria,descrizione:dati.descrizione,
+      scadenza:dati.scadenza,preavviso_giorni:dati.preavviso_giorni,ricorrenza:dati.ricorrenza,
+      ogni_x:dati.ogni_x,rinnovo_auto:dati.rinnovo_auto,note:dati.note,
+    };
+    let idScadenza;
+    if(mode==='create'){
+      const{data,error}=await db.from('scadenze').insert(payload).select('id').single();
+      if(error){showToast('Errore',traduciErrore(error.message));document.getElementById('modalConfirm').disabled=false;return;}
+      idScadenza=data.id;
+    }else{
+      const{error}=await db.from('scadenze').update(payload).eq('id',selectedId);
+      if(error){showToast('Errore',traduciErrore(error.message));document.getElementById('modalConfirm').disabled=false;return;}
+      idScadenza=selectedId;
+      await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza);
+    }
+    // Destinatari: gruppo (sempre) + utente (sempre, se diverso da gruppo) + extra
+    const emailGruppo=gruppoCorrente.email_gruppo;
+    const emailUtente=utenteCorrente.email;
+    const destinatari=[];
+    destinatari.push({id_scadenza:idScadenza,email:emailGruppo,tipo:'gruppo'});
+    if(emailUtente!==emailGruppo){
+      destinatari.push({id_scadenza:idScadenza,email:emailUtente,tipo:'utente'});
+    }
+    // Email extra — deduplicazione rispetto a gruppo e utente
+    const giàPresenti=new Set([emailGruppo,emailUtente]);
+    dati.emailsExtra.forEach(em=>{
+      if(em&&!giàPresenti.has(em)){destinatari.push({id_scadenza:idScadenza,email:em,tipo:'extra'});giàPresenti.add(em);}
+    });
+    await db.from('scadenze_destinatari').insert(destinatari);
+    document.getElementById('modalConfirm').disabled=false;
+    closeModal();
+    showToast(mode==='create'?'Salvato':'Aggiornato',mode==='create'?'Nuova scadenza inserita.':'Modifica salvata.');
+    await carica();
+  }catch(e){
+    showToast('Errore',traduciErrore(e.message));
+    document.getElementById('modalConfirm').disabled=false;
+  }
+}
+
+function openDeleteConfirm(){
+  if(!selectedId)return;const row=all.find(r=>String(r.id)===String(selectedId));if(!row)return;
+  document.getElementById('confirmText').innerHTML=`
+    <div style="display:grid;gap:6px">
+      <div style="font-weight:800;font-size:18px;line-height:1.15">${escapeHtml(row.descrizione)}</div>
+      <div class="cell-muted" style="font-size:15px;font-weight:600">${escapeHtml(row.categoria)} · ${escapeHtml(row.sottoCategoria)}</div>
+      <div class="cell-muted"><strong>Scadenza:</strong> ${escapeHtml(row.scadenzaIT)}</div>
+      ${row.note?`<div class="cell-muted"><strong>Note:</strong> ${escapeHtml(row.note)}</div>`:''}
+      <div class="cell-muted" style="margin-top:10px">L'evento sarà eliminato logicamente e resterà nello storico fino alla data di retention.</div>
+    </div>`;
+  setActiveRow(selectedId);setRowActionClass('delete');
+  document.getElementById('confirmBackdrop').style.display='flex';
+}
+function closeConfirm(){document.getElementById('confirmBackdrop').style.display='none';clearActiveRow();}
+
+async function doDelete(){
+  document.getElementById('confirmOk').disabled=true;const idToRemove=selectedId;
+  try{
+    const{error}=await db.from('scadenze').update({eliminato:true,eliminato_il:new Date().toISOString()}).eq('id',idToRemove);
+    document.getElementById('confirmOk').disabled=false;closeConfirm();
+    if(error){showToast('Errore',traduciErrore(error.message));return;}
+    showToast('Eliminato','Evento eliminato logicamente.');clearSelection();await carica();
+  }catch(e){
+    document.getElementById('confirmOk').disabled=false;closeConfirm();
+    showToast('Errore',traduciErrore(e.message));
+  }
+}
+
+let renewRiprendi=false; // variabile modulo: true quando il rinnovo serve anche a riprendere la sospensione
+function openRenew(id, riprendi=false){
+  renewId=id; renewRiprendi=!!riprendi;
+  const row=all.find(r=>String(r.id)===String(id));if(!row)return;
+  setActiveRow(id);
+  document.getElementById('rOldScadenza').value=row.scadenzaIT;
+  document.getElementById('rNote').value=row.note;
+  if(riprendi){
+  const oggi=new Date();
+  const oggiISO=`${oggi.getFullYear()}-${String(oggi.getMonth()+1).padStart(2,'0')}-${String(oggi.getDate()).padStart(2,'0')}`;
+  document.getElementById('rScadenza').value=calcolaProssimaScadenza(oggiISO,row.ricorrenza,row.ogniX);
+  }else{
+    document.getElementById('rScadenza').value=calcolaProssimaScadenza(row.scadenzaISO,row.ricorrenza,row.ogniX);
+  }
+  const r=String(row.ricorrenza||'NESSUNA').toUpperCase();const x=row.ogniX||'?';
+  const rm={GIORNALIERA:'Giornaliera',SETTIMANALE:'Settimanale',MENSILE:'Mensile',ANNUALE:'Annuale',X_GIORNI:`Ogni ${x} giorni`,X_SETTIMANE:`Ogni ${x} settimane`,X_MESI:`Ogni ${x} mesi`,X_ANNI:`Ogni ${x} anni`};
+  document.getElementById('rRule').value=rm[r]||'—';
+  document.getElementById('renewBackdrop').style.display='flex';
+}
+function closeRenewModal(){document.getElementById('renewBackdrop').style.display='none';clearActiveRow();}
+
+async function confirmRenew(){
+  const nuovaScadenza=document.getElementById('rScadenza').value;const note=document.getElementById('rNote').value;
+  if(!nuovaScadenza){showToast('Dati mancanti','Inserisci la nuova scadenza.');return;}
+  document.getElementById('renewOk').disabled=true;
+  try{
+    const{error}=await db.from('scadenze').update({scadenza:nuovaScadenza,note}).eq('id',renewId);
+    document.getElementById('renewOk').disabled=false;
+    if(error){showToast('Errore',traduciErrore(error.message));return;}
+    if(renewRiprendi){
+      const{error:errSospeso}=await db.from('scadenze').update({rinnovo_sospeso:false}).eq('id',renewId);
+      if(errSospeso){showToast('Attenzione','Scadenza aggiornata ma errore nel riprendere il rinnovo automatico.');renewRiprendi=false;closeRenewModal();await carica();return;}
+    }
+    closeRenewModal();
+    showToast('Rinnovato', renewRiprendi?'Rinnovo ripreso con nuova scadenza.':'Scadenza aggiornata.');
+    renewRiprendi=false;
+    await carica();
+  }catch(e){
+    document.getElementById('renewOk').disabled=false;
+    renewRiprendi=false;
+    showToast('Errore',traduciErrore(e.message));
+  }
+}
+
+async function toggleRinnovoSospeso(id){
+  const row=all.find(r=>String(r.id)===String(id));if(!row)return;
+  if(row.rinnovoSospeso){
+    // Sta riprendendo → apre il modale Rinnova così l'utente sceglie la nuova data
+    // confirmRenew si occuperà di salvare la nuova scadenza;
+    // al termine dobbiamo anche rimettere rinnovo_sospeso=false
+    openRenew(id, true); // true = "riprendi dopo conferma"
+    return;
+  }
+  // Sta sospendendo → aggiorna solo il flag
+  try{
+    const{error}=await db.from('scadenze').update({rinnovo_sospeso:true}).eq('id',id);
+    if(error){showToast('Errore',traduciErrore(error.message));return;}
+    showToast('Sospeso','Rinnovo automatico sospeso.');
+    await carica();
+  }catch(e){showToast('Errore',traduciErrore(e.message));}
+}
+  
+function openPastDateConfirm(msg,fn){_pastDateContinue=fn;document.getElementById('pastDateText').textContent=msg;document.getElementById('pastDateBackdrop').style.display='flex';}
+function closePastDateConfirm(){document.getElementById('pastDateBackdrop').style.display='none';}
+
+function popolaAutocomplete(){
+  const categorie=[...new Set(all.map(r=>r.categoria).filter(Boolean))].sort();
+  const sottoCat=[...new Set(all.map(r=>r.sottoCategoria).filter(Boolean))].sort();
+  const descrizioni=[...new Set(all.map(r=>r.descrizione).filter(Boolean))].sort();
+  const emails=[...new Set(all.flatMap(r=>r.emails).filter(Boolean))].sort();
+  fillDatalist('dlCategoria',categorie);fillDatalist('dlSottoCategoria',sottoCat);
+  fillDatalist('dlDescrizione',descrizioni);fillDatalist('dlEmail',emails);
+  const fCat=document.getElementById('fCategoria');const curVal=fCat.value;
+  fCat.innerHTML='<option value="">Tutte</option>';
+  categorie.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;fCat.appendChild(o);});
+  fCat.value=curVal;updateSottoCategoriaOptions();
+}
+function fillDatalist(id,items){const dl=document.getElementById(id);if(!dl)return;dl.innerHTML='';items.forEach(v=>{const o=document.createElement('option');o.value=v;dl.appendChild(o);});}
+function updateSottoCategoriaOptions(){
+  const cat=document.getElementById('fCategoria')?.value||'';
+  const sottoCat=[...new Set(all.filter(r=>!cat||r.categoria===cat).map(r=>r.sottoCategoria).filter(Boolean))].sort();
+  const fSub=document.getElementById('fSottoCategoria');const cur=fSub.value;
+  fSub.innerHTML='<option value="">Tutte</option>';
+  sottoCat.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fSub.appendChild(o);});
+  fSub.value=sottoCat.includes(cur)?cur:'';
+}
+function traduciErrore(msg){
+  const m = String(msg||'').toLowerCase();
+  if(m.includes('ogni_x_check')) return 'Il valore "Ogni X" inserito non è valido per questa ricorrenza.';
+  if(m.includes('duplicate key')) return 'Esiste già un elemento con questi dati.';
+  if(m.includes('violates row-level security') || m.includes('permission denied')) return 'Non hai i permessi per completare questa operazione.';
+  if(m.includes('invalid login credentials')) return 'Credenziali non valide.';
+  if(m.includes('password should be at least')) return 'La password deve avere almeno 6 caratteri.';
+  if(m.includes('failed to fetch') || m.includes('network')) return 'Problema di connessione. Controlla la rete e riprova.';
+  if(m.includes('jwt') || m.includes('token')) return 'Sessione scaduta. Effettua di nuovo l\'accesso.';
+  return 'Si è verificato un problema imprevisto. Riprova o contatta l\'amministratore.';
+}
+function showToast(title,msg){
+  document.getElementById('toastTitle').textContent=title;document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast');t.style.display='block';
+  clearTimeout(showToast._tm);showToast._tm=setTimeout(()=>t.style.display='none',3200);
+}
+function esportaCSV(){
+  if(view.length===0){showToast('Nessun dato','Non ci sono scadenze da esportare.');return;}
+  const intestazioni=['Categoria','Sotto categoria','Descrizione','Scadenza','Preavviso (giorni)','Ricorrenza','Ogni X','Rinnovo automatico','Note','Email extra'];
+  const righe=view.map(r=>[
+    r.categoria,
+    r.sottoCategoria,
+    r.descrizione,
+    r.scadenzaIT,
+    r.preavviso,
+    r.ricorrenza,
+    r.ogniX,
+    r.rinnovoAuto?'Sì':'No',
+    (r.note||'').replace(/[\r\n;]+/g,' '),
+    (r.emails||[]).join(', ')
+  ]);
+  const escapeCsv=v=>{const s=String(v??'');return s.includes(';')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csv=[intestazioni,...righe].map(riga=>riga.map(escapeCsv).join(';')).join('\r\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const oggi=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`scadenze_export_${oggi}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function setLoading(on){document.getElementById('tableCard').classList.toggle('loading',!!on);}
+function escapeHtml(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
+function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms);};}
+function toTitleCase(str){
+  return str.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+}
+
+// ── Tema ──
+function applicaTema(tema) {
+  const preferisce = window.matchMedia('(prefers-color-scheme: light)').matches ? 'chiaro' : 'scuro';
+  const effettivo = tema === 'sistema' ? preferisce : (tema || 'scuro');
+  document.body.classList.toggle('tema-chiaro', effettivo === 'chiaro');
+  // Aggiorna indicatori bottoni nel modale se aperto
+  document.querySelectorAll('.temaBtn').forEach(b => b.classList.toggle('active', b.dataset.tema === (tema||'scuro')));
+}
+
+// Aggiorna il tema in tempo reale se il sistema operativo cambia (solo se tema="sistema")
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (utenteCorrente && utenteCorrente.tema === 'sistema') {
+    applicaTema('sistema');
+  }
+});
+  
+// ── Impostazioni ──
+function openImpostazioni() {
+  if (!utenteCorrente) return;
+  document.getElementById('settEmail').textContent = utenteCorrente.email || '—';
+  document.getElementById('settNome').value = utenteCorrente.nome || '';
+  document.getElementById('settGruppo').textContent = gruppoCorrente?.nome || '—';
+  const ua = utenteCorrente.ultimo_accesso;
+  document.getElementById('settUltimoAccesso').textContent = ua
+    ? new Date(ua).toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '—';
+  const temaAttuale = utenteCorrente.tema || 'scuro';
+  document.querySelectorAll('.temaBtn').forEach(b => b.classList.toggle('active', b.dataset.tema === temaAttuale));
+  document.getElementById('settPwd1').value = '';
+  document.getElementById('settPwd2').value = '';
+  document.getElementById('settBackdrop').style.display = 'flex';
+  document.getElementById('settBackdrop').setAttribute('aria-hidden', 'false');
+}
+function closeImpostazioni() {
+  document.getElementById('settBackdrop').style.display = 'none';
+  document.getElementById('settBackdrop').setAttribute('aria-hidden', 'true');
+}
+
+async function salvaImpostazioni() {
+  const nuovoNome = document.getElementById('settNome').value.trim();
+  const temaSelezionato = document.querySelector('.temaBtn.active')?.dataset.tema || 'scuro';
+  const pwd1 = document.getElementById('settPwd1').value;
+  const pwd2 = document.getElementById('settPwd2').value;
+
+  // Validazione password
+  if (pwd1 || pwd2) {
+    if (pwd1 !== pwd2) { showToast('Errore', 'Le password non coincidono.'); return; }
+    if (pwd1.length < 6) { showToast('Errore', 'La password deve avere almeno 6 caratteri.'); return; }
+  }
+
+  document.getElementById('settSalva').disabled = true;
+
+  try {
+    // Aggiorna profilo su tabella utenti
+    const { error: errProfilo } = await db.from('utenti')
+      .update({ nome: nuovoNome, tema: temaSelezionato })
+      .eq('id', utenteCorrente.id);
+    if (errProfilo) { showToast('Errore', traduciErrore(errProfilo.message)); document.getElementById('settSalva').disabled = false; return; }
+
+    // Aggiorna password su Supabase Auth (solo se inserita)
+    if (pwd1) {
+      const { error: errPwd } = await db.auth.updateUser({ password: pwd1 });
+      if (errPwd) { showToast('Errore password', traduciErrore(errPwd.message)); document.getElementById('settSalva').disabled = false; return; }
+    }
+
+    // Aggiorna stato locale
+    utenteCorrente.nome = nuovoNome;
+    utenteCorrente.tema = temaSelezionato;
+    applicaTema(temaSelezionato);
+
+    document.getElementById('settSalva').disabled = false;
+    closeImpostazioni();
+    showToast('Salvato', 'Impostazioni aggiornate.');
+  } catch (e) {
+    showToast('Errore', traduciErrore(e.message));
+    document.getElementById('settSalva').disabled = false;
+  }
+}
+
+function wireUiOnce(){
+  if(wireUiOnce._done)return;wireUiOnce._done=true;
+  document.getElementById('btnEsci').addEventListener('click', async () => { await db.auth.signOut(); window.location.href = 'index.html'; });
+  document.getElementById('btnImpostazioni').addEventListener('click', openImpostazioni);
+  document.getElementById('settClose').addEventListener('click', closeImpostazioni);
+  document.getElementById('settCancel').addEventListener('click', closeImpostazioni);
+  document.getElementById('settSalva').addEventListener('click', salvaImpostazioni);
+  document.querySelectorAll('.temaBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.temaBtn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Anteprima immediata senza salvare
+      applicaTema(btn.dataset.tema);
+    });
+  });
+  document.getElementById('btnInserisci').addEventListener('click',openCreate);
+  document.getElementById('btnExportCsv').addEventListener('click',esportaCSV);
+  document.getElementById('btnModifica').addEventListener('click',openEdit);
+  document.getElementById('btnElimina').addEventListener('click',openDeleteConfirm);
+  document.getElementById('mRicorrenza').addEventListener('change',toggleOgniX);
+  document.getElementById('modalClose').addEventListener('click',closeModal);
+  document.getElementById('modalCancel').addEventListener('click',closeModal);
+  document.getElementById('modalConfirm').addEventListener('click',confirmModal);
+  document.getElementById('confirmClose').addEventListener('click',closeConfirm);
+  document.getElementById('confirmCancel').addEventListener('click',closeConfirm);
+  document.getElementById('confirmOk').addEventListener('click',doDelete);
+  document.getElementById('pastDateClose').addEventListener('click',closePastDateConfirm);
+  document.getElementById('pastDateCancel').addEventListener('click',closePastDateConfirm);
+  document.getElementById('pastDateOk').addEventListener('click',()=>{const fn=_pastDateContinue;closePastDateConfirm();if(fn)fn();});
+  document.getElementById('renewClose').addEventListener('click',closeRenewModal);
+  document.getElementById('renewCancel').addEventListener('click',closeRenewModal);
+  document.getElementById('renewOk').addEventListener('click',confirmRenew);
+  document.getElementById('thScadenza').addEventListener('click',()=>cycleSortTh('thScadenza','dateAsc','dateDesc'));
+  document.getElementById('thCategoria').addEventListener('click',()=>cycleSortTh('thCategoria','cat','catDesc'));
+  document.getElementById('thDescrizione').addEventListener('click',()=>cycleSortTh('thDescrizione','descAsc','descDesc'));
+  document.getElementById('thPreavviso').addEventListener('click',()=>cycleSortTh('thPreavviso','prevAsc','prevDesc'));
+ document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
+ document.getElementById('q').addEventListener('input',(e)=>{if(e.target.value.trim()===''){applyFilters();}});
+  document.getElementById('fCategoria').addEventListener('change',async()=>{await carica();updateSottoCategoriaOptions();applyFilters();});
+  ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',async()=>{await carica();applyFilters();});});
+  document.getElementById('fEntroVal')?.addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
+  const btnFiltri=document.getElementById('btnFiltri');const popover=document.getElementById('filtriPopover');
+  btnFiltri.addEventListener('click',()=>{popover.style.display=popover.style.display==='none'?'block':'none';});
+  document.getElementById('btnApplicaFiltri').addEventListener('click',async()=>{popover.style.display='none';await carica();applyFilters();});
+  document.getElementById('btnResetFiltri').addEventListener('click',async()=>{
+    ['fCategoria','fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fEntroVal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('fEntroUnit').value='days';document.getElementById('fSort').value='priority';
+    popover.style.display='none';await carica();updateSottoCategoriaOptions();applyFilters();
+  });
+  const tbody=document.getElementById('tbody');
+  tbody.addEventListener('change',ev=>{
+    if(ev.target.name!=='selRow')return;
+    tbody.querySelectorAll('input[name="selRow"]').forEach(x=>{if(x!==ev.target)x.checked=false;});
+    if(ev.target.checked)setSelection(ev.target.value);else clearSelection();
+  });
+  tbody.addEventListener('click',ev=>{
+    const btn=ev.target.closest?.('button');if(!btn)return;
+    const action=btn.dataset.action;const rowId=btn.dataset.rowid;
+    if(action==='renew'){ev.stopPropagation();openRenew(rowId);return;}
+    if(action==='duplicate'){ev.stopPropagation();duplicaScadenza(rowId);return;}
+    if(action==='toggleSospeso'){ev.stopPropagation();toggleRinnovoSospeso(rowId);return;}
+    if(action==='toggleInfo'){
+      const tr=btn.closest('tr');const next=tr.nextElementSibling;
+      const isThis=next?.classList.contains('details-row')&&next.dataset.detailsFor===String(rowId);
+      if(isThis){
+        const box=next.querySelector('.details');const isOpen=next.style.display==='table-row';
+        next.style.display=isOpen?'none':'table-row';if(box)box.style.display=isOpen?'none':'block';
+        btn.textContent=isOpen?'+ Info':'− Chiudi';return;
+      }
+      const rowObj=view.find(x=>String(x.id)===String(rowId))||all.find(x=>String(x.id)===String(rowId));
+      if(!rowObj)return;
+      const ric=String(rowObj.ricorrenza||'NESSUNA').toUpperCase();const x=rowObj.ogniX||'?';
+      const ricLabelMap={GIORNALIERA:'Giornaliera',SETTIMANALE:'Settimanale',MENSILE:'Mensile',ANNUALE:'Annuale',X_GIORNI:`Ogni ${x} giorni`,X_SETTIMANE:`Ogni ${x} settimane`,X_MESI:`Ogni ${x} mesi`,X_ANNI:`Ogni ${x} anni`};
+      const ricLabel=ricLabelMap[ric]||'';
+      const ricBlock=(ric!=='NESSUNA'&&ricLabel)?`<div class="kv"><div class="k">Ricorrenza</div><div class="v">${escapeHtml(ricLabel)}</div></div>`:'';
+      const autoBlock=rowObj.rinnovoAuto?`<div class="kv"><div class="k">Rinnovo</div><div class="v"><span class="pill" style="background:rgba(124,240,194,.15);color:#7cf0c2;border:1px solid rgba(124,240,194,.3)">🔄 Automatico</span></div></div>`:'';
+      // Mostra solo email extra nel dettaglio
+      const emailsBlock=rowObj.emails.length>0
+        ?rowObj.emails.map((em,i)=>`<div class="kv"><div class="k">Email extra ${i+1}</div><div class="v">${escapeHtml(em)}</div></div>`).join('')
+        :'';
+      const details=document.createElement('tr');details.className='details-row';details.dataset.detailsFor=String(rowId);
+      const td=document.createElement('td');td.colSpan=7;
+      const box=document.createElement('div');box.className='details';
+      box.innerHTML=`<div class="detailsGrid">${ricBlock}${autoBlock}<div class="kv"><div class="k">Note</div><div class="v">${escapeHtml(rowObj.note||'—')}</div></div>${emailsBlock}</div>`;
+      td.appendChild(box);details.appendChild(td);tr.after(details);
+      details.style.display='table-row';box.style.display='block';btn.textContent='− Chiudi';
+    }
+  });
+}
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
+
+// Aggiornamento automatico ogni 5 minuti
+setInterval(async()=>{
+  const ok = await verificaGruppoAttivo();
+  if (!ok) return;
+  await carica(); applyFilters();
+},5*60*1000);
+</script>
+</body>
+</html>
