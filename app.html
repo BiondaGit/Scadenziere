@@ -252,6 +252,7 @@
     <div class="field">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-4.3-4.3"/><path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/></svg>
       <input id="q" placeholder="Cerca per descrizione, categoria o sotto-categoria…" autocomplete="off" />
+      <datalist id="dlCerca"></datalist>
     </div>
     <div class="field" style="position:relative;padding:0">
       <button class="btn" id="btnFiltri" type="button" style="width:100%;justify-content:center;border:0;background:transparent">Filtri</button>
@@ -473,6 +474,7 @@ let activeRowId=null, originalEdit=null, _pastDateContinue=null;
 let utenteCorrente=null, gruppoCorrente=null;
 
 async function avvia() {
+  popolaDatalistRicerche(JSON.parse(localStorage.getItem('ricercheRecenti')||'[]'));
   const { data:{ session } } = await db.auth.getSession();
   if (!session) { window.location.href='index.html'; return; }
 
@@ -554,6 +556,21 @@ function computeStatus(row){
   if(diff<0)return'overdue'; if(diff<=Number(row.preavviso??0))return'due'; return'ok';
 }
 function isPastDate(iso){ if(!iso)return false; const d=new Date(iso+'T00:00:00'); const t=new Date(); t.setHours(0,0,0,0); return d<t; }
+
+function aggiornaRicercheRecenti(termine){
+  if(!termine) return;
+  let elenco = JSON.parse(localStorage.getItem('ricercheRecenti')||'[]');
+  elenco = elenco.filter(t=>t.toLowerCase()!==termine.toLowerCase());
+  elenco.unshift(termine);
+  elenco = elenco.slice(0,10);
+  localStorage.setItem('ricercheRecenti', JSON.stringify(elenco));
+  popolaDatalistRicerche(elenco);
+}
+function popolaDatalistRicerche(elenco){
+  const dl = document.getElementById('dlCerca');
+  if(!dl) return;
+  dl.innerHTML = elenco.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"></option>`).join('');
+}
 
 function calcolaProssimaScadenza(iso,ricorrenza,ogniX){
   // iso è sempre in formato YYYY-MM-DD
@@ -1134,8 +1151,8 @@ function wireUiOnce(){
   document.getElementById('thCategoria').addEventListener('click',()=>cycleSortTh('thCategoria','cat','catDesc'));
   document.getElementById('thDescrizione').addEventListener('click',()=>cycleSortTh('thDescrizione','descAsc','descDesc'));
   document.getElementById('thPreavviso').addEventListener('click',()=>cycleSortTh('thPreavviso','prevAsc','prevDesc'));
- document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
- document.getElementById('q').addEventListener('input',(e)=>{if(e.target.value.trim()===''){applyFilters();}});
+  document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){aggiornaRicercheRecenti(e.target.value.trim());await carica();applyFilters();}});
+  document.getElementById('q').addEventListener('input',(e)=>{if(e.target.value.trim()===''){applyFilters();}});
   document.getElementById('fCategoria').addEventListener('change',async()=>{await carica();updateSottoCategoriaOptions();applyFilters();});
   ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',async()=>{await carica();applyFilters();});});
   document.getElementById('fEntroVal')?.addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
