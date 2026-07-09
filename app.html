@@ -421,6 +421,10 @@
           <div><div class="settRowLabel">Ultimo accesso</div></div>
           <span id="settUltimoAccesso" style="font-size:13px;color:var(--muted)">—</span>
         </div>
+        <div class="settRow">
+          <div><div class="settRowLabel">Versione app</div><div class="settRowSub">Per verificare se stai vedendo l'ultimo aggiornamento</div></div>
+          <span id="settVersione" style="font-size:13px;color:var(--muted)">—</span>
+        </div>
       </div>
 
       <!-- Tema -->
@@ -464,6 +468,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
+const APP_VERSION = 'v1.1 — 09/07/2026 (Ogni X anni + fix ricerca)';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -475,6 +480,11 @@ let utenteCorrente=null, gruppoCorrente=null;
 
 async function avvia() {
   popolaDatalistRicerche(JSON.parse(localStorage.getItem('ricercheRecenti')||'[]'));
+  
+  document.getElementById('appVersionBadge').textContent = APP_VERSION;
+  const settVer = document.getElementById('settVersione');
+  if (settVer) settVer.textContent = APP_VERSION;
+  
   const { data:{ session } } = await db.auth.getSession();
   if (!session) { window.location.href='index.html'; return; }
 
@@ -1214,5 +1224,6 @@ setInterval(async()=>{
   await carica(); applyFilters();
 },5*60*1000);
 </script>
+<div id="appVersionBadge" style="position:fixed;bottom:8px;right:10px;font-size:11px;color:var(--muted);opacity:.55;pointer-events:none;z-index:9999;font-family:monospace"></div>
 </body>
 </html>
