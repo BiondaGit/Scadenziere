@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2d — 15/07/2026';
+const APP_VERSION = 'v1.2e — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1242,8 +1242,8 @@ document.addEventListener('keydown', function(e) {
   if (activeModal) {
     e.preventDefault();
     
-    // Cerca nell'ordine: un ID che finisce con "Cancel", "Close", o con classe .x o .btn
-    const closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], .x, .btn');
+  // Cerca nell'ordine: un ID che finisce con "Cancel", "Close", "Reset" o con classe .x o .btn
+  const closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], [id$="Reset"], .x, .btn');
     
     if (closeBtn) {
       console.log(`[Escape] Chiudo la modale attiva cliccando:`, closeBtn.id || closeBtn.className);
