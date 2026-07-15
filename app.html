@@ -243,7 +243,7 @@
   <div class="topbar">
     <div class="brand">
       <div class="logo" aria-hidden="true"></div>
-      <div><h1>Scadenziere</h1><div class="sub" id="nomeGruppo">—</div><div class="sub" id="subVersione" style="font-size:11px;opacity:.55"></div></div>
+      <div><h1>Scadenziere</h1><div class="sub" id="nomeGruppo">—</div><div class="sub" id="sub" style="font-size:11px;opacity:.55"></div></div>
     </div>
     <div class="actions">
       <button class="btn primary" id="btnInserisci">
@@ -436,8 +436,8 @@
           <span id="settUltimoAccesso" style="font-size:13px;color:var(--muted)">—</span>
         </div>
         <div class="settRow">
-          <div><div class="settRowLabel">Versione app</div><div class="settRowSub">Per verificare se stai vedendo l'ultimo aggiornamento</div></div>
-          <span id="settVersione" style="font-size:13px;color:var(--muted)">—</span>
+          <div><div class="settRowLabel"> app</div><div class="settRowSub">Per verificare se stai vedendo l'ultimo aggiornamento</div></div>
+          <span id="sett" style="font-size:13px;color:var(--muted)">—</span>
         </div>
       </div>
 
@@ -482,7 +482,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.0 — 09/07/2026';
+const APP_VERSION = 'v1.1 — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
