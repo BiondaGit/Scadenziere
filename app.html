@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2e — 15/07/2026';
+const APP_VERSION = 'v1.2f — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1230,35 +1230,48 @@ function wireUiOnce(){
   });
 }
 
-// GESTIONE SMART DEL TASTO ESCAPE
+// GESTIONE SMART DEL TASTO ESCAPE (Versione Corretta)
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
 
-  // 1. Cerca se c'è una modale visibile in pagina (display === 'flex')
+  // 1. Cerca se c'è una modale visibile in pagina
   const activeModal = Array.from(document.querySelectorAll('.backdrop'))
     .find(modal => window.getComputedStyle(modal).display === 'flex');
 
-  // 2. Se c'è una modale attiva, trova il suo pulsante di chiusura e simulane il click
   if (activeModal) {
     e.preventDefault();
     
-  // Cerca nell'ordine: un ID che finisce con "Cancel", "Close", "Reset" o con classe .x o .btn
-  const closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], [id$="Reset"], .x, .btn');
+    // 2. Cerchiamo il pulsante di chiusura con selettori standard
+    let closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], [id$="Reset"], [id*="reset"], [id*="cancel"], .x');
     
-    if (closeBtn) {
-      console.log(`[Escape] Chiudo la modale attiva cliccando:`, closeBtn.id || closeBtn.className);
-      closeBtn.click();
+    // 3. SE NON LO TROVA: Cerchiamo un qualsiasi bottone dentro la modale che contenga il testo "reset", "annulla" o "chiudi" (case-insensitive)
+    if (!closeBtn) {
+      const buttons = activeModal.querySelectorAll('button, a, .btn');
+      closeBtn = Array.from(buttons).find(btn => {
+        const text = btn.textContent.trim().toLowerCase();
+        return text.includes('reset') || text.includes('annulla') || text.includes('chiudi') || text.includes('clear');
+      });
     }
-    return; // Blocca qui per evitare di ripulire la ricerca se c'era una modale aperta
+
+    // 4. Eseguiamo il click sul pulsante trovato
+    if (closeBtn) {
+      console.log(`[Escape] Chiudo la modale attiva cliccando:`, closeBtn.id || closeBtn.className || closeBtn.textContent.trim());
+      closeBtn.click();
+    } else {
+      // Fallback estremo: se non trova nessun tasto, nasconde direttamente la modale attiva agendo sullo stile
+      console.log(`[Escape] Nessun pulsante di chiusura trovato. Nascondo direttamente la modale.`);
+      activeModal.style.display = 'none';
+    }
+    return; 
   }
 
-  // 3. Se non ci sono modali aperte, controlla se l'utente ha il focus sulla barra di ricerca
+  // 3. Gestione barra di ricerca (se nessuna modale è aperta)
   const searchInput = document.getElementById('q');
   if (searchInput && document.activeElement === searchInput) {
     if (searchInput.value !== "") {
       e.preventDefault();
       searchInput.value = "";
-      applyFilters(); // Nel tuo codice la funzione di aggiornamento filtri corretta è applyFilters()
+      applyFilters();
     }
   }
 });
