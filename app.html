@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2g — 15/07/2026';
+const APP_VERSION = 'v1.2h — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1230,35 +1230,44 @@ function wireUiOnce(){
   });
 }
 
-// GESTIONE SMART DEL TASTO ESCAPE (Versione Corretta e Ultra-Mirata)
+// GESTIONE SMART DEL TASTO ESCAPE (Risoluzione bug Filtri e Focus Evidenziato)
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
 
-  // 1. Cerca se c'è una modale visibile in pagina
+  // 1. GESTIONE DEI FILTRI (Popover specifico)
+  const filtriPopover = document.getElementById('filtriPopover');
+  if (filtriPopover && window.getComputedStyle(filtriPopover).display === 'block') {
+    e.preventDefault();
+    // Nasconde il popover dei filtri
+    filtriPopover.style.display = 'none';
+    // Rimuove il focus visivo ("l'evidenziato") da qualsiasi bottone attivo
+    if (document.activeElement) document.activeElement.blur();
+    return;
+  }
+
+  // 2. GESTIONE DELLE MODALI (.backdrop)
   const activeModal = Array.from(document.querySelectorAll('.backdrop'))
     .find(modal => window.getComputedStyle(modal).display === 'flex');
 
   if (activeModal) {
     e.preventDefault();
     
-    // 2. Trova tutti i potenziali elementi cliccabili nella modale
+    // Trova tutti i potenziali elementi cliccabili nella modale corrente
     const elements = activeModal.querySelectorAll('button, input[type="button"], input[type="reset"], a, .btn, [class*="close"], [class*="cancel"], [class*="reset"]');
     
-    // 3. Filtra per trovare SOLO il vero bottone di chiusura/reset/annullamento
+    // Filtra per trovare il vero bottone di chiusura/reset/annullamento
     const closeBtn = Array.from(elements).find(el => {
       const id = (el.id || '').toLowerCase();
       const className = (typeof el.className === 'string' ? el.className : '').toLowerCase();
       const text = (el.textContent || '').toLowerCase();
-      const value = (el.value || '').toLowerCase(); // Gestisce i tasti <input type="reset">
+      const value = (el.value || '').toLowerCase();
       
-      // Parole chiave che indicano un'azione di chiusura/reset
       const isClosing = 
         id.includes('cancel') || id.includes('close') || id.includes('reset') || id.includes('clear') || id.includes('annulla') || id.includes('chiudi') ||
         className.includes('close') || className.includes('cancel') || className.includes('reset') ||
         text.includes('reset') || text.includes('annulla') || text.includes('chiudi') || text.includes('clear') || text.trim() === 'x' ||
         value.includes('reset') || value.includes('annulla') || value.includes('chiudi') || value.includes('clear');
         
-      // Escludiamo categoricamente i tasti di invio/conferma/filtro per evitare falsi positivi
       const isSubmit = 
         id.includes('submit') || id.includes('apply') || id.includes('save') || id.includes('conferma') || id.includes('applica') || id.includes('filtra') || id.includes('filtri') ||
         text.includes('applica') || text.includes('conferma') || text.includes('salva') || text.includes('apply') || text.includes('submit') || text.includes('filtra') || text.includes('filtri') ||
@@ -1267,24 +1276,29 @@ document.addEventListener('keydown', function(e) {
       return isClosing && !isSubmit;
     });
 
-    // 4. Se trova il bottone corretto lo clicca, altrimenti nasconde la modale forzatamente
+    // Rimuove l'evidenziazione azzurra dai bottoni attivi in pagina prima di chiudere
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    // Esegue il click sul tasto di chiusura se trovato, altrimenti nasconde forzatamente la modale
     if (closeBtn) {
-      console.log(`[Escape] Chiudo la modale cliccando:`, closeBtn.id || closeBtn.className || closeBtn.value || closeBtn.textContent.trim());
       closeBtn.click();
     } else {
-      console.log(`[Escape] Nessun tasto specifico trovato. Chiusura forzata della modale.`);
       activeModal.style.display = 'none';
+      clearActiveRow(); // Ripristina lo stato delle righe tabella se necessario
     }
     return; 
   }
 
-  // 3. Gestione barra di ricerca (se nessuna modale è aperta)
+  // 3. GESTIONE BARRA DI RICERCA (Se non ci sono modali o popover aperti)
   const searchInput = document.getElementById('q');
   if (searchInput && document.activeElement === searchInput) {
     if (searchInput.value !== "") {
       e.preventDefault();
       searchInput.value = "";
       applyFilters();
+      searchInput.blur(); // Toglie il focus dalla barra di ricerca
     }
   }
 });
