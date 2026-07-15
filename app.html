@@ -64,8 +64,7 @@
       border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);
       padding:10px 12px;display:flex;gap:10px;align-items:center;
     }
-    .field input{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}
-    .field select{width:100%;background-color:var(--card);border:0;outline:0;color:var(--text);font-size:14px}
+    .field input,.field select{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:14px}
     .field input::placeholder{color:rgba(232,236,255,.45)}
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
@@ -92,20 +91,7 @@
     .filtersGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .fgrp{border:1px solid var(--line);border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.03)}
     .fgrp label{display:block;font-size:11px;color:rgba(232,236,255,.62);text-transform:uppercase;letter-spacing:.05em}
-    .fgrp input,.fgrp textarea{margin-top:6px;width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
-    .fgrp select{margin-top:6px;width:100%;border:0;outline:0;background-color:var(--card);color:var(--text);font-size:14px}
-    /* Sfondo/testo espliciti sulle singole voci: senza questo, su Windows (Chrome/Edge/Firefox)
-       il menu a tendina nativo ripiega sullo sfondo bianco di sistema mantenendo però il colore
-       chiaro del testo ereditato dal tema, rendendo le voci illeggibili finché non ci si passa
-       sopra col mouse. Su macOS il popup nativo ignora il CSS e resta sempre leggibile: per questo
-       il bug si vedeva solo su Windows. */
-    select option{background-color:var(--card);color:var(--text)}
-    /* Difensivo per i <datalist> (autocomplete di Categoria/Sotto categoria/Descrizione/Email/ricerca):
-       a differenza del <select>, questo widget nativo ha un supporto CSS molto limitato in Chrome/Edge
-       (spesso ignorato del tutto), quindi questa regola potrebbe non avere effetto ovunque. Da verificare
-       su Windows: se il testo dei suggerimenti risultasse comunque illeggibile, va gestito con un
-       autocomplete "finto" fatto in HTML/JS, non con il datalist nativo. */
-    datalist{background-color:var(--card);color:var(--text)}
+    .fgrp input,.fgrp select,.fgrp textarea{margin-top:6px;width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
     .fgrp textarea{min-height:84px;resize:vertical}
     .modalFoot{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
     .card{
@@ -243,7 +229,7 @@
   <div class="topbar">
     <div class="brand">
       <div class="logo" aria-hidden="true"></div>
-      <div><h1>Scadenziere</h1><div class="sub" id="nomeGruppo">—</div><div class="sub" id="sub" style="font-size:11px;opacity:.55"></div></div>
+      <div><h1>Scadenziere</h1><div class="sub" id="nomeGruppo">—</div><div class="sub" id="subVersione" style="font-size:11px;opacity:.55"></div></div>
     </div>
     <div class="actions">
       <button class="btn primary" id="btnInserisci">
@@ -436,8 +422,8 @@
           <span id="settUltimoAccesso" style="font-size:13px;color:var(--muted)">—</span>
         </div>
         <div class="settRow">
-          <div><div class="settRowLabel"> app</div><div class="settRowSub">Per verificare se stai vedendo l'ultimo aggiornamento</div></div>
-          <span id="sett" style="font-size:13px;color:var(--muted)">—</span>
+          <div><div class="settRowLabel">Versione app</div><div class="settRowSub">Per verificare se stai vedendo l'ultimo aggiornamento</div></div>
+          <span id="settVersione" style="font-size:13px;color:var(--muted)">—</span>
         </div>
       </div>
 
@@ -482,7 +468,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.1 — 15/07/2026';
+const APP_VERSION = 'v1.0 — 09/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
