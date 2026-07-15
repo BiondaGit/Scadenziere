@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2c — 15/07/2026';
+const APP_VERSION = 'v1.2d — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1230,40 +1230,36 @@ function wireUiOnce(){
   });
 }
 
-document.addEventListener('keydown', function(e){
-  
-if(e.key !== 'Escape') return;
-console.log(e.key);
+// GESTIONE SMART DEL TASTO ESCAPE
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
 
-    // Se è aperto il popup Nuova/Modifica
-  if (!modalBackdrop.classList.contains('hidden')) {
+  // 1. Cerca se c'è una modale visibile in pagina (display === 'flex')
+  const activeModal = Array.from(document.querySelectorAll('.backdrop'))
+    .find(modal => window.getComputedStyle(modal).display === 'flex');
+
+  // 2. Se c'è una modale attiva, trova il suo pulsante di chiusura e simulane il click
+  if (activeModal) {
     e.preventDefault();
-    modalCancelBtn.click();
-    return;
+    
+    // Cerca nell'ordine: un ID che finisce con "Cancel", "Close", o con classe .x o .btn
+    const closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], .x, .btn');
+    
+    if (closeBtn) {
+      console.log(`[Escape] Chiudo la modale attiva cliccando:`, closeBtn.id || closeBtn.className);
+      closeBtn.click();
+    }
+    return; // Blocca qui per evitare di ripulire la ricerca se c'era una modale aperta
   }
 
-  // Se è aperto il popup Rinnovo
-  if (!renewModal.classList.contains('hidden')) {
-    e.preventDefault();
-    renewCancelBtn.click();
-    return;
-  }
-
-  // Se è aperto il popup Impostazioni
-  if (!settingsModal.classList.contains('hidden')) {
-    e.preventDefault();
-    settingsCancelBtn.click();
-    return;
-  }
-
-  // Ricerca
-  if (document.activeElement === searchInput) {
+  // 3. Se non ci sono modali aperte, controlla se l'utente ha il focus sulla barra di ricerca
+  const searchInput = document.getElementById('q');
+  if (searchInput && document.activeElement === searchInput) {
     if (searchInput.value !== "") {
       e.preventDefault();
       searchInput.value = "";
-      render();
+      applyFilters(); // Nel tuo codice la funzione di aggiornamento filtri corretta è applyFilters()
     }
-    return;
   }
 });
   
