@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2i — 15/07/2026';
+const APP_VERSION = 'v1.2j — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1292,8 +1292,19 @@ document.addEventListener('keydown', function(e) {
     return; 
   }
 
-  // 3. GESTIONE BARRA DI RICERCA (Se non ci sono modali o popover aperti)
+  // 3. GESTIONE RESET SELEZIONE O BARRA DI RICERCA (Se non ci sono modali o popover aperti)
   const searchInput = document.getElementById('q');
+  
+  // Se c'è una riga selezionata nella tabella, deselezionala con Escape
+  if (selectedId !== null) {
+    e.preventDefault();
+    clearSelection();
+    clearActiveRow();
+    if (document.activeElement) document.activeElement.blur();
+    return;
+  }
+
+  // Se non c'era una riga selezionata, ma il focus è sulla barra di ricerca
   if (searchInput && document.activeElement === searchInput) {
     if (searchInput.value !== "") {
       e.preventDefault();
