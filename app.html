@@ -1230,6 +1230,42 @@ function wireUiOnce(){
   });
 }
 
+document.addEventListener('keydown', function(e){
+
+if(e.key !== 'Escape') return;
+
+    // Se è aperto il popup Nuova/Modifica
+  if (!modal.classList.contains('hidden')) {
+    e.preventDefault();
+    cancelBtn.click();
+    return;
+  }
+
+  // Se è aperto il popup Rinnovo
+  if (!renewModal.classList.contains('hidden')) {
+    e.preventDefault();
+    renewCancelBtn.click();
+    return;
+  }
+
+  // Se è aperto il popup Impostazioni
+  if (!settingsModal.classList.contains('hidden')) {
+    e.preventDefault();
+    settingsCancelBtn.click();
+    return;
+  }
+
+  // Ricerca
+  if (document.activeElement === searchInput) {
+    if (searchInput.value !== "") {
+      e.preventDefault();
+      searchInput.value = "";
+      render();
+    }
+    return;
+  }
+});
+  
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
 
 // Aggiornamento automatico ogni 5 minuti
