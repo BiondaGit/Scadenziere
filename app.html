@@ -483,7 +483,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2f — 15/07/2026';
+const APP_VERSION = 'v1.2g — 15/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1230,7 +1230,7 @@ function wireUiOnce(){
   });
 }
 
-// GESTIONE SMART DEL TASTO ESCAPE (Versione Corretta)
+// GESTIONE SMART DEL TASTO ESCAPE (Versione Corretta e Ultra-Mirata)
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
 
@@ -1241,25 +1241,38 @@ document.addEventListener('keydown', function(e) {
   if (activeModal) {
     e.preventDefault();
     
-    // 2. Cerchiamo il pulsante di chiusura con selettori standard
-    let closeBtn = activeModal.querySelector('[id$="Cancel"], [id$="Close"], [id$="Reset"], [id*="reset"], [id*="cancel"], .x');
+    // 2. Trova tutti i potenziali elementi cliccabili nella modale
+    const elements = activeModal.querySelectorAll('button, input[type="button"], input[type="reset"], a, .btn, [class*="close"], [class*="cancel"], [class*="reset"]');
     
-    // 3. SE NON LO TROVA: Cerchiamo un qualsiasi bottone dentro la modale che contenga il testo "reset", "annulla" o "chiudi" (case-insensitive)
-    if (!closeBtn) {
-      const buttons = activeModal.querySelectorAll('button, a, .btn');
-      closeBtn = Array.from(buttons).find(btn => {
-        const text = btn.textContent.trim().toLowerCase();
-        return text.includes('reset') || text.includes('annulla') || text.includes('chiudi') || text.includes('clear');
-      });
-    }
+    // 3. Filtra per trovare SOLO il vero bottone di chiusura/reset/annullamento
+    const closeBtn = Array.from(elements).find(el => {
+      const id = (el.id || '').toLowerCase();
+      const className = (typeof el.className === 'string' ? el.className : '').toLowerCase();
+      const text = (el.textContent || '').toLowerCase();
+      const value = (el.value || '').toLowerCase(); // Gestisce i tasti <input type="reset">
+      
+      // Parole chiave che indicano un'azione di chiusura/reset
+      const isClosing = 
+        id.includes('cancel') || id.includes('close') || id.includes('reset') || id.includes('clear') || id.includes('annulla') || id.includes('chiudi') ||
+        className.includes('close') || className.includes('cancel') || className.includes('reset') ||
+        text.includes('reset') || text.includes('annulla') || text.includes('chiudi') || text.includes('clear') || text.trim() === 'x' ||
+        value.includes('reset') || value.includes('annulla') || value.includes('chiudi') || value.includes('clear');
+        
+      // Escludiamo categoricamente i tasti di invio/conferma/filtro per evitare falsi positivi
+      const isSubmit = 
+        id.includes('submit') || id.includes('apply') || id.includes('save') || id.includes('conferma') || id.includes('applica') || id.includes('filtra') || id.includes('filtri') ||
+        text.includes('applica') || text.includes('conferma') || text.includes('salva') || text.includes('apply') || text.includes('submit') || text.includes('filtra') || text.includes('filtri') ||
+        value.includes('applica') || value.includes('conferma') || value.includes('salva') || value.includes('apply') || value.includes('filtra');
 
-    // 4. Eseguiamo il click sul pulsante trovato
+      return isClosing && !isSubmit;
+    });
+
+    // 4. Se trova il bottone corretto lo clicca, altrimenti nasconde la modale forzatamente
     if (closeBtn) {
-      console.log(`[Escape] Chiudo la modale attiva cliccando:`, closeBtn.id || closeBtn.className || closeBtn.textContent.trim());
+      console.log(`[Escape] Chiudo la modale cliccando:`, closeBtn.id || closeBtn.className || closeBtn.value || closeBtn.textContent.trim());
       closeBtn.click();
     } else {
-      // Fallback estremo: se non trova nessun tasto, nasconde direttamente la modale attiva agendo sullo stile
-      console.log(`[Escape] Nessun pulsante di chiusura trovato. Nascondo direttamente la modale.`);
+      console.log(`[Escape] Nessun tasto specifico trovato. Chiusura forzata della modale.`);
       activeModal.style.display = 'none';
     }
     return; 
