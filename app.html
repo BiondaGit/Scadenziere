@@ -122,6 +122,7 @@
     }
     tbody td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:15px;line-height:1.2}
     tbody tr:not(.row-overdue):not(.row-due):not(.row-active):hover{background:rgba(255,255,255,.03)}
+    tbody tr{user-select:none}
     .cell-muted{color:var(--muted);font-size:13px}
     .descTitle,.descSub{margin:0;padding:0}
     tbody tr.row-overdue>td{background:rgba(160,60,60,.22)!important}
@@ -483,7 +484,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.2j — 15/07/2026';
+const APP_VERSION = 'v1.3 — 17/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1227,6 +1228,15 @@ function wireUiOnce(){
       td.appendChild(box);details.appendChild(td);tr.after(details);
       details.style.display='table-row';box.style.display='block';btn.textContent='− Chiudi';
     }
+  });
+  tbody.addEventListener('dblclick',ev=>{
+    if(ev.target.closest('button')||ev.target.closest('input'))return; // non interferire con pulsanti azione e checkbox
+    const tr=ev.target.closest('tr[data-rowid]');if(!tr)return;
+    const rowId=tr.dataset.rowid;
+    const cb=tr.querySelector('input[name="selRow"]');
+    if(cb){tbody.querySelectorAll('input[name="selRow"]').forEach(x=>{if(x!==cb)x.checked=false;});cb.checked=true;}
+    setSelection(rowId);
+    openEdit();
   });
 }
 
