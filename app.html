@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.3c — 19/07/2026';
+const APP_VERSION = 'v1.3d — 19/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -571,6 +571,15 @@ async function avvia() {
   if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
     await db.auth.signOut();
     sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Un utente disabilitato dall'Admin non deve restare dentro l'app,
+  // nemmeno se aveva già una sessione aperta al momento della disabilitazione.
+  if (utente.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo account è stato disabilitato. Contatta l\'amministratore.');
     window.location.href = 'index.html';
     return;
   }
