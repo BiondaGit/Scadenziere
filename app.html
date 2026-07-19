@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.3d — 19/07/2026';
+const APP_VERSION = 'v1.3e — 19/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -603,20 +603,26 @@ utenteCorrente=utente; gruppoCorrente=utente.gruppi;
   await carica(); wireUiOnce();
 }
   
-// Verifica che il gruppo sia ancora attivo. Se non lo è, blocca l'utente con messaggio chiaro.
 async function verificaGruppoAttivo() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) return false;
 
-  const { data: utente, error } = await db.from('utenti').select('id,gruppi(attivo)').eq('id', session.user.id).single();
+  const { data: utente, error } = await db.from('utenti').select('id,attivo,gruppi(attivo)').eq('id', session.user.id).single();
   if (error || !utente || !utente.gruppi || utente.gruppi.attivo !== true) {
     await db.auth.signOut();
     sessionStorage.setItem('msgLogin', 'Il tuo gruppo è stato sospeso. Contatta l\'amministratore.');
     window.location.href = 'index.html';
     return false;
   }
+  if (utente.attivo !== true) {
+    await db.auth.signOut();
+    sessionStorage.setItem('msgLogin', 'Il tuo account è stato disabilitato. Contatta l\'amministratore.');
+    window.location.href = 'index.html';
+    return false;
+  }
   return true;
 }
+  
 async function carica() {
   setLoading(true);
   const { data, error } = await db
