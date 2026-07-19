@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attiva account · Scadenziere</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Scadenziere" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ── Token di design (identici a index.html) ── */
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --border:    #2a2d3a;
+      --accent:    #4f8ef7;
+      --accent-hover: #3a7ae0;
+      --danger:    #e05c5c;
+      --text:      #e8eaf0;
+      --text-muted:#7a7f99;
+      --radius:    10px;
+      --font:      'Inter', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .login-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .field {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    input[readonly] {
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.4rem;
+    }
+
+    button[type="submit"]:hover {
+      background: var(--accent-hover);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    a.link-secondario {
+      display: block;
+      text-align: center;
+      margin-top: 1.2rem;
+      color: var(--accent);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    a.link-secondario:hover { text-decoration: underline; }
+
+    .msg {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.7rem 0.9rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .msg.errore {
+      display: block;
+      background: rgba(224, 92, 92, 0.15);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .msg.info {
+      display: block;
+      background: rgba(79, 142, 247, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .nascosto { display: none !important; }
+
+    .spinner-testo {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Attiva il tuo account</h1>
+      <p>Imposta una password per accedere a Scadenziere</p>
+    </div>
+
+    <!-- Stato: verifica del link in corso -->
+    <p class="spinner-testo" id="statoVerifica">Verifica del link in corso…</p>
+
+    <!-- Stato: form di attivazione -->
+    <form id="formAttivazione" class="nascosto">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" readonly />
+      </div>
+
+      <div class="field">
+        <label for="password">Nuova password</label>
+        <input type="password" id="password" placeholder="Almeno 8 caratteri" autocomplete="new-password" />
+      </div>
+
+      <div class="field">
+        <label for="password2">Conferma password</label>
+        <input type="password" id="password2" placeholder="••••••••" autocomplete="new-password" />
+      </div>
+
+      <button type="submit" id="btnAttiva">Attiva account</button>
+    </form>
+
+    <!-- Stato: account già attivato in precedenza -->
+    <div id="giaAttivo" class="nascosto">
+      <p class="spinner-testo">Questo account è già stato attivato.</p>
+      <a class="link-secondario" href="index.html">Vai al login →</a>
+    </div>
+
+    <div class="msg" id="messaggio"></div>
+  </div>
+
+  <script>
+    // ── Configurazione Supabase (identica a index.html) ──
+    const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ── Elementi UI ──
+    const statoVerifica  = document.getElementById('statoVerifica');
+    const formAttivazione = document.getElementById('formAttivazione');
+    const giaAttivo       = document.getElementById('giaAttivo');
+    const inpEmail        = document.getElementById('email');
+    const inpPwd          = document.getElementById('password');
+    const inpPwd2         = document.getElementById('password2');
+    const btnAttiva       = document.getElementById('btnAttiva');
+    const messaggio       = document.getElementById('messaggio');
+
+    function mostraMessaggio(testo, tipo) {
+      messaggio.textContent = testo;
+      messaggio.className = 'msg ' + tipo;
+    }
+
+    function mostraErroreLink(testo) {
+      statoVerifica.classList.add('nascosto');
+      mostraMessaggio(testo, 'errore');
+    }
+
+    let sessioneGestita = false;
+
+    async function gestisciSessione(session) {
+      if (sessioneGestita) return;
+      if (!session) return;
+      sessioneGestita = true;
+
+      const { data: utente, error } = await db
+        .from('utenti')
+        .select('id, email, data_attivazione')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !utente) {
+        mostraErroreLink('Impossibile verificare il tuo profilo. Contatta l\'amministratore del tuo gruppo.');
+        return;
+      }
+
+      statoVerifica.classList.add('nascosto');
+
+      if (utente.data_attivazione) {
+        // Link riaperto dopo che l'account è già stato attivato: nessun reset password da qui.
+        giaAttivo.classList.remove('nascosto');
+        return;
+      }
+
+      inpEmail.value = utente.email;
+      formAttivazione.classList.remove('nascosto');
+    }
+
+    // Il link email stabilisce la sessione in modo asincrono al caricamento della pagina.
+    db.auth.onAuthStateChange((event, session) => {
+      if (session) gestisciSessione(session);
+    });
+
+    (async () => {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        gestisciSessione(session);
+        return;
+      }
+      // Nessuna sessione dopo un tempo ragionevole → il link non è valido o è scaduto.
+      setTimeout(() => {
+        if (!sessioneGestita) {
+          mostraErroreLink('Link non valido o scaduto. Contatta l\'amministratore del tuo gruppo per un nuovo invito.');
+        }
+      }, 4000);
+    })();
+
+    // ── Attivazione ──
+    formAttivazione.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const pwd  = inpPwd.value;
+      const pwd2 = inpPwd2.value;
+
+      if (pwd.length < 8) {
+        mostraMessaggio('La password deve avere almeno 8 caratteri.', 'errore');
+        return;
+      }
+      if (pwd !== pwd2) {
+        mostraMessaggio('Le due password non coincidono.', 'errore');
+        return;
+      }
+
+      btnAttiva.disabled = true;
+      btnAttiva.textContent = 'Attivazione in corso…';
+      messaggio.className = 'msg';
+
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        mostraMessaggio('Sessione scaduta. Richiedi un nuovo invito all\'amministratore.', 'errore');
+        btnAttiva.disabled = false;
+        btnAttiva.textContent = 'Attiva account';
+        return;
+      }
+
+      const { error: errPwd } = await db.auth.updateUser({ password: pwd });
+      if (errPwd) {
+        mostraMessaggio('Impossibile impostare la password: ' + errPwd.message, 'errore');
+        btnAttiva.disabled = false;
+        btnAttiva.textContent = 'Attiva account';
+        return;
+      }
+
+      const { error: errUpdate } = await db
+        .from('utenti')
+        .update({ data_attivazione: new Date().toISOString() })
+        .eq('id', session.user.id);
+
+      if (errUpdate) {
+        mostraMessaggio('Password impostata, ma si è verificato un errore di attivazione. Contatta l\'amministratore.', 'errore');
+        btnAttiva.disabled = false;
+        btnAttiva.textContent = 'Attiva account';
+        return;
+      }
+
+      mostraMessaggio('Account attivato. Caricamento…', 'info');
+      window.location.href = 'app.html';
+    });
+  </script>
+
+</body>
+</html>
