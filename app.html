@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.3a — 19/07/2026';
+const APP_VERSION = 'v1.3b — 19/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1205,6 +1205,24 @@ async function salvaImpostazioni() {
 // ── Gestione Utenti (solo Admin) ──
 let utentiGruppo = [];
 let eliminaUtenteId = null;
+  
+// Le Edge Function di Supabase, su risposta non-2xx, restituiscono data:null:
+// il messaggio d'errore va letto dal corpo originale della risposta (error.context).
+async function invocaGestioneInviti(payload) {
+  const { data, error } = await db.functions.invoke('gestione-inviti', { body: payload });
+  if (error) {
+    let messaggio = 'Si è verificato un problema imprevisto. Riprova o contatta l\'amministratore.';
+    if (error.context && typeof error.context.json === 'function') {
+      try {
+        const corpo = await error.context.json();
+        if (corpo?.errore) messaggio = corpo.errore;
+      } catch (_) { /* corpo non in formato JSON, resta il messaggio generico */ }
+    }
+    return { ok: false, errore: messaggio };
+  }
+  if (data?.errore) return { ok: false, errore: data.errore };
+  return { ok: true, data };
+}
 
 // Stato derivato: stessa logica della funzione SQL utente_stato(), lato client
 function statoUtente(u) {
@@ -1283,8 +1301,8 @@ async function invitaUtente() {
   const btn = document.getElementById('btnInvita');
   btn.disabled = true;
   try {
-    const { data, error } = await db.functions.invoke('gestione-inviti', { body: { azione: 'invita', nome, email } });
-    if (error || data?.errore) { showToast('Errore', data?.errore || traduciErrore(error?.message)); return; }
+    const risultato = await invocaGestioneInviti({ azione: 'invita', nome, email });
+    if (!risultato.ok) { showToast('Errore', risultato.errore); return; }
     showToast('Invito inviato', `Email di invito inviata a ${email}.`);
     document.getElementById('invNome').value = '';
     document.getElementById('invEmail').value = '';
@@ -1298,8 +1316,8 @@ async function invitaUtente() {
 
 async function reinviaInvito(id) {
   try {
-    const { data, error } = await db.functions.invoke('gestione-inviti', { body: { azione: 'reinvia', id_utente: id } });
-    if (error || data?.errore) { showToast('Errore', data?.errore || traduciErrore(error?.message)); return; }
+    const risultato = await invocaGestioneInviti({ azione: 'reinvia', id_utente: id });
+    if (!risultato.ok) { showToast('Errore', risultato.errore); return; } 
     showToast('Invito reinviato', 'Una nuova email di invito è stata inviata.');
     await caricaUtentiGruppo();
   } catch (e) {
