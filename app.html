@@ -484,7 +484,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.3 — 17/07/2026';
+const APP_VERSION = 'v1.3a — 19/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -522,6 +522,13 @@ async function avvia() {
     return;
   }
 
+// Il link di invito autentica subito, prima che la password sia impostata:
+// se l'utente non ha ancora completato l'attivazione, non deve entrare nell'app.
+if (!utente.data_attivazione) {
+  window.location.href = 'accetta-invito.html';
+  return;
+}
+  
 utenteCorrente=utente; gruppoCorrente=utente.gruppi;
   if (error||!utente) { showToast('Errore','Profilo utente non trovato.'); return; }
   utenteCorrente=utente; gruppoCorrente=utente.gruppi;
