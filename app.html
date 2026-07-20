@@ -1577,17 +1577,12 @@ document.addEventListener('keydown', function(e) {
   }
 });
   
-// Aggiornamento automatico ogni 30 secondi
+// Aggiornamento automatico ogni 5 minuti
 setInterval(async()=>{
   const ok = await verificaGruppoAttivo();
   if (!ok) return;
   await carica(); applyFilters();
-},30*1000);
-
-// Controllo immediato quando l'utente torna a guardare la scheda
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') verificaGruppoAttivo();
-});
+},5*60*1000);
 </script>
 </body>
 </html>
