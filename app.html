@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.3e — 19/07/2026';
+const APP_VERSION = 'v1.4 — 20/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1577,14 +1577,17 @@ document.addEventListener('keydown', function(e) {
   }
 });
   
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
-
-// Aggiornamento automatico ogni 5 minuti
+// Aggiornamento automatico ogni 30 secondi
 setInterval(async()=>{
   const ok = await verificaGruppoAttivo();
   if (!ok) return;
   await carica(); applyFilters();
-},5*60*1000);
+},30*1000);
+
+// Controllo immediato quando l'utente torna a guardare la scheda
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') verificaGruppoAttivo();
+});
 </script>
 </body>
 </html>
