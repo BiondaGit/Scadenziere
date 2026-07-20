@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.4a — 20/07/2026';
+const APP_VERSION = 'v1.4b — 20/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1431,8 +1431,15 @@ function wireUiOnce(){
   document.getElementById('thPreavviso').addEventListener('click',()=>cycleSortTh('thPreavviso','prevAsc','prevDesc'));
   document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){aggiornaRicercheRecenti(e.target.value.trim());await carica();applyFilters();}});
   document.getElementById('q').addEventListener('input',(e)=>{if(e.target.value.trim()===''){applyFilters();}});
-  document.getElementById('fCategoria').addEventListener('change',async()=>{await carica();updateSottoCategoriaOptions();applyFilters();});
-  ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{document.getElementById(id)?.addEventListener('change',async()=>{await carica();applyFilters();});});
+  
+  document.getElementById('fCategoria').addEventListener('change', ()=>{
+  updateSottoCategoriaOptions();
+  applyFilters();
+  });
+  ['fSottoCategoria','fDataDa','fDataA','fStato','fRicorrenza','fSort'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('change', applyFilters);
+  });
+  
   document.getElementById('fEntroVal')?.addEventListener('keydown',async(e)=>{if(e.key==='Enter'){await carica();applyFilters();}});
   const btnFiltri=document.getElementById('btnFiltri');const popover=document.getElementById('filtriPopover');
   btnFiltri.addEventListener('click',()=>{popover.style.display=popover.style.display==='none'?'block':'none';});
