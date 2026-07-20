@@ -1588,6 +1588,8 @@ setInterval(async()=>{
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') verificaGruppoAttivo();
 });
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
 </script>
 </body>
 </html>
