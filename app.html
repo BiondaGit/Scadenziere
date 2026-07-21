@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.4c — 20/07/2026';
+const APP_VERSION = 'v1.5 — 21/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1371,9 +1371,12 @@ function chiudiConfermaEliminaUtente() {
 }
 async function eliminaUtenteConfermato() {
   if (!eliminaUtenteId) return;
-  const { error } = await db.from('utenti').delete().eq('id', eliminaUtenteId);
+  const idDaEliminare = eliminaUtenteId;
   chiudiConfermaEliminaUtente();
-  if (error) { showToast('Errore', traduciErrore(error.message)); return; }
+
+  const risultato = await invocaGestioneInviti({ azione: 'elimina', id_utente: idDaEliminare });
+  if (!risultato.ok) { showToast('Errore', risultato.errore); return; }
+
   showToast('Eliminato', 'Utente rimosso dal gruppo.');
   await caricaUtentiGruppo();
 }
