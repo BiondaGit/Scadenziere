@@ -346,39 +346,51 @@
 <!-- MODAL: Inserisci / Modifica -->
 <div class="backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="modal">
-    <div class="modalHead"><h2 id="modalTitle">Nuova scadenza</h2><button class="x" id="modalClose">Chiudi</button></div>
-    <div class="modalBody">
-      <div class="formGrid">
-        <div class="fgrp"><label>Categoria *</label><input id="mCategoria" placeholder="Es. Auto" list="dlCategoria" /></div>
-        <div class="fgrp"><label>Sotto categoria</label><input id="mSottoCategoria" placeholder="Es. Assicurazione" list="dlSottoCategoria" /></div>
-        <div class="fgrp"><label>Descrizione *</label><input id="mDescrizione" placeholder="Es. Panda DY524CX" list="dlDescrizione" /></div>
-        <div class="fgrp"><label>Scadenza *</label><input id="mScadenza" type="date" /></div>
-        <div class="fgrp"><label>Ricorrenza</label>
-          <select id="mRicorrenza">
-            <option value="NESSUNA">Nessuna</option><option value="GIORNALIERA">Giornaliera</option>
-            <option value="X_GIORNI">Ogni X giorni</option><option value="SETTIMANALE">Settimanale</option>
-            <option value="X_SETTIMANE">Ogni X settimane</option><option value="MENSILE">Mensile</option>
-            <option value="X_MESI">Ogni X mesi</option><option value="ANNUALE">Annuale</option>
-            <option value="X_ANNI">Ogni X anni</option>
-          </select>
-        </div>
-        <div class="fgrp" id="grpOgniX" style="display:none"><label id="lblOgniX">Ogni X mesi</label><input id="mOgniX" type="number" min="2" step="1" placeholder="Es. 3" /></div>
-        <div class="fgrp" id="grpRinnovoAuto" style="display:none"><label>Rinnovo automatico</label>
-          <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
-        </div>
-        <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
-        <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" name="mEmail1" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-        <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" name="mEmail2" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-        <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" name="mEmail3" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-        <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" name="mEmail4" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-        <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" name="mEmail5" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div> 
-        <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
-      </div>
-      <div class="cell-muted" style="margin-top:10px">
-        <strong>Nota:</strong> Email gruppo e email utente vengono aggiunte automaticamente. Le email extra sono destinatari aggiuntivi facoltativi.
-      </div>
+    <div class="modalHead">
+      <h2 id="modalTitle">Nuova scadenza</h2>
+      <button class="x" id="modalClose">Chiudi</button>
     </div>
-    <div class="modalFoot"><button class="btn" id="modalCancel">Annulla</button><button class="btn primary" id="modalConfirm">Conferma</button></div>
+    
+    <!-- APERTURA FORM -->
+    <form id="modalForm" autocomplete="off" onsubmit="event.preventDefault();">
+      <div class="modalBody">
+        <div class="formGrid">
+          <div class="fgrp"><label>Categoria *</label><input id="mCategoria" placeholder="Es. Auto" list="dlCategoria" /></div>
+          <div class="fgrp"><label>Sotto categoria</label><input id="mSottoCategoria" placeholder="Es. Assicurazione" list="dlSottoCategoria" /></div>
+          <div class="fgrp"><label>Descrizione *</label><input id="mDescrizione" placeholder="Es. Panda DY524CX" list="dlDescrizione" /></div>
+          <div class="fgrp"><label>Scadenza *</label><input id="mScadenza" type="date" /></div>
+          <div class="fgrp"><label>Ricorrenza</label>
+            <select id="mRicorrenza">
+              <option value="NESSUNA">Nessuna</option><option value="GIORNALIERA">Giornaliera</option>
+              <option value="X_GIORNI">Ogni X giorni</option><option value="SETTIMANALE">Settimanale</option>
+              <option value="X_SETTIMANE">Ogni X settimane</option><option value="MENSILE">Mensile</option>
+              <option value="X_MESI">Ogni X mesi</option><option value="ANNUALE">Annuale</option>
+              <option value="X_ANNI">Ogni X anni</option>
+            </select>
+          </div>
+          <div class="fgrp" id="grpOgniX" style="display:none"><label id="lblOgniX">Ogni X mesi</label><input id="mOgniX" type="number" min="2" step="1" placeholder="Es. 3" /></div>
+          <div class="fgrp" id="grpRinnovoAuto" style="display:none"><label>Rinnovo automatico</label>
+            <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
+          </div>
+          <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
+          <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" name="mEmail1" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+          <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" name="mEmail2" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+          <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" name="mEmail3" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+          <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" name="mEmail4" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+          <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" name="mEmail5" type="text" inputmode="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div> 
+          <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
+        </div>
+        <div class="cell-muted" style="margin-top:10px">
+          <strong>Nota:</strong> Email gruppo e email utente vengono aggiunte automaticamente. Le email extra sono destinatari aggiuntivi facoltativi.
+        </div>
+      </div>
+      <div class="modalFoot">
+        <button type="button" class="btn" id="modalCancel">Annulla</button>
+        <button type="button" class="btn primary" id="modalConfirm">Conferma</button>
+      </div>
+    </form>
+    <!-- CHIUSURA FORM -->
+
   </div>
 </div>
 
@@ -537,7 +549,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.6d — 28/07/2026';
+const APP_VERSION = 'v1.6e — 28/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
