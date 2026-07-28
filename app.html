@@ -240,6 +240,33 @@
       .fgrp{padding:12px 14px;border-radius:14px}
       .detailsGrid{grid-template-columns:1fr}
     }
+    
+    .rel-box { position: relative; }
+
+    .custom-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1e293b; /* Colore scuro coordinato con la tua modale */
+      border: 1px solid #334155;
+      border-radius: 6px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    
+    .custom-dropdown div {
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    
+    .custom-dropdown div:hover {
+      background: #334155;
+    }
   </style>
 </head>
 <body>
@@ -373,11 +400,26 @@
             <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
           </div>
           <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
-          <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" type="text" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-          <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" type="text" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-          <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" type="text" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-          <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" type="text" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
-          <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" type="text" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+          <div class="fgrp rel-box">
+            <label>Email extra 1</label>
+            <input id="mEmail1" type="text" class="email-extra-input" placeholder="opzionale" autocomplete="off" />
+          </div>
+          <div class="fgrp rel-box">
+            <label>Email extra 2</label>
+            <input id="mEmail2" type="text" class="email-extra-input" placeholder="opzionale" autocomplete="off" />
+          </div>
+          <div class="fgrp rel-box">
+            <label>Email extra 3</label>
+            <input id="mEmail3" type="text" class="email-extra-input" placeholder="opzionale" autocomplete="off" />
+          </div>
+          <div class="fgrp rel-box">
+            <label>Email extra 4</label>
+            <input id="mEmail4" type="text" class="email-extra-input" placeholder="opzionale" autocomplete="off" />
+          </div>
+          <div class="fgrp rel-box">
+            <label>Email extra 5</label>
+            <input id="mEmail5" type="text" class="email-extra-input" placeholder="opzionale" autocomplete="off" />
+          </div>
           <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
         </div>
         <div class="cell-muted" style="margin-top:10px">
@@ -549,7 +591,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.6f — 28/07/2026';
+const APP_VERSION = 'v1.6g — 28/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -984,6 +1026,55 @@ async function doSalva(dati){
     showToast('Errore',traduciErrore(e.message));
     document.getElementById('modalConfirm').disabled=false;
   }
+}
+
+// Inizializza i suggerimenti custom sui 5 campi extra
+document.querySelectorAll('.email-extra-input').forEach(input => {
+  
+  input.addEventListener('input', mostraSuggerimenti);
+  input.addEventListener('focus', mostraSuggerimenti);
+
+  function mostraSuggerimenti() {
+    chiudiTuttiIDropdown();
+    
+    const val = this.value.toLowerCase().trim();
+
+    // Recupera le email dinamiche dalla datalist #dlEmail se esiste, oppure dall'array
+    const opzioni = Array.from(document.querySelectorAll('#dlEmail option')).map(opt => opt.value);
+    const filtrati = opzioni.filter(e => e.toLowerCase().includes(val));
+
+    if (filtrati.length === 0) return;
+
+    // Crea il menu grafico custom
+    const dropdown = document.createElement('div');
+    dropdown.className = 'custom-dropdown';
+
+    filtrati.forEach(email => {
+      const item = document.createElement('div');
+      item.textContent = email;
+      
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault(); // Impedisce la perdita di focus
+        input.value = email;
+        chiudiTuttiIDropdown();
+      });
+
+      dropdown.appendChild(item);
+    });
+
+    this.parentNode.appendChild(dropdown);
+  }
+});
+
+// Chiude la tendina se si clicca fuori dai box
+document.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('email-extra-input')) {
+    chiudiTuttiIDropdown();
+  }
+});
+
+function chiudiTuttiIDropdown() {
+  document.querySelectorAll('.custom-dropdown').forEach(d => d.remove());
 }
 
 function openDeleteConfirm(){
