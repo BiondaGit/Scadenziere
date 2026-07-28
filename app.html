@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.6b — 28/07/2026';
+const APP_VERSION = 'v1.6a — 28/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -951,53 +951,19 @@ async function doSalva(dati){
       await db.from('scadenze_destinatari').delete().eq('id_scadenza',idScadenza);
     }
     // Destinatari: gruppo (sempre) + utente (sempre, se diverso da gruppo) + extra
-    const emailGruppo = (gruppoCorrente.email_gruppo || '').toLowerCase().trim();
-    const emailUtente = (utenteCorrente.email || '').toLowerCase().trim();
-    
-    // 1. Controllo e Validazione degli Input Extra
-    const giaInseriteExtra = new Set();
-    const destinatariExtraFinali = [];
-    
-    for (const email of dati.emailsExtra) {
-      if (!email) continue;
-      
-      const em = email.toLowerCase().trim();
-    
-      // Blocco se inserisce la mail del suo gruppo o la propria
-      if (em === emailGruppo) {
-        alert(`L'email "${email}" è già l'email principale del tuo gruppo e riceverà la notifica automaticamente.`);
-        return; // Interrompe il salvataggio
-      }
-      
-      if (em === emailUtente) {
-        alert(`L'email "${email}" è la tua email personale e riceverai già la notifica automaticamente.`);
-        return; // Interrompe il salvataggio
-      }
-    
-      // Evita duplicati solo tra le stesse email extra digitate nei campi
-      if (!giaInseriteExtra.has(em)) {
-        giaInseriteExtra.add(em);
-        destinatariExtraFinali.push(em);
-      }
-    }
-    
-    // 2. Preparazione dell'array destinatari
-    const destinatari = [];
-    
-    if (emailGruppo) {
-      destinatari.push({ id_scadenza: idScadenza, email: emailGruppo, tipo: 'gruppo' });
-    }
-    
-    if (emailUtente && emailUtente !== emailGruppo) {
-      destinatari.push({ id_scadenza: idScadenza, email: emailUtente, tipo: 'utente' });
-    }
-    
-    // Salva come extra tutte le altre mail (comprese quelle di altri colleghi del gruppo)
-    destinatariExtraFinali.forEach(em => {
-      destinatari.push({ id_scadenza: idScadenza, email: em, tipo: 'extra' });
-    });
-    
-    await db.from('scadenze_destinatari').insert(destinatari);
+    const emailGruppo=gruppoCorrente.email_gruppo;
+    const emailUtente=utenteCorrente.email;
+    const destinatari=[];
+    destinatari.push({id_scadenza:idScadenza,email:emailGruppo,tipo:'gruppo'});
+    if(emailUtente!==emailGruppo){
+      destinatari.push({id_scadenza:idScadenza,email:emailUtente,tipo:'utente'});
+    }
+    // Email extra — deduplicazione rispetto a gruppo e utente
+    const giàPresenti=new Set([emailGruppo,emailUtente]);
+    dati.emailsExtra.forEach(em=>{
+      if(em&&!giàPresenti.has(em)){destinatari.push({id_scadenza:idScadenza,email:em,tipo:'extra'});giàPresenti.add(em);}
+    });
+    await db.from('scadenze_destinatari').insert(destinatari);
     document.getElementById('modalConfirm').disabled=false;
     closeModal();
     showToast(mode==='create'?'Salvato':'Aggiornato',mode==='create'?'Nuova scadenza inserita.':'Modifica salvata.');
