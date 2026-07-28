@@ -367,11 +367,11 @@
           <div class="rememberRow"><input id="mRinnovoAuto" type="checkbox" /><label for="mRinnovoAuto">Rinnova automaticamente alla scadenza</label></div>
         </div>
         <div class="fgrp"><label>Preavviso (giorni)</label><input id="mPreavviso" type="number" min="0" step="1" value="0" placeholder="Es. 40" /></div>
-        <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" type="email" placeholder="opzionale" list="dlEmail" /></div>
-        <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" type="email" placeholder="opzionale" list="dlEmail" /></div>
-        <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" type="email" placeholder="opzionale" list="dlEmail" /></div>
-        <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" type="email" placeholder="opzionale" list="dlEmail" /></div>
-        <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" type="email" placeholder="opzionale" list="dlEmail" /></div>
+        <div class="fgrp"><label>Email extra 1</label><input id="mEmail1" name="mEmail1" type="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+        <div class="fgrp"><label>Email extra 2</label><input id="mEmail2" name="mEmail2" type="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+        <div class="fgrp"><label>Email extra 3</label><input id="mEmail3" name="mEmail3" type="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+        <div class="fgrp"><label>Email extra 4</label><input id="mEmail4" name="mEmail4" type="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
+        <div class="fgrp"><label>Email extra 5</label><input id="mEmail5" name="mEmail5" type="email" placeholder="opzionale" list="dlEmail" autocomplete="off" /></div>
         <div class="fgrp" style="grid-column:1/-1"><label>Note</label><textarea id="mNote" placeholder="opzionale"></textarea></div>
       </div>
       <div class="cell-muted" style="margin-top:10px">
@@ -537,7 +537,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.5 — 21/07/2026';
+const APP_VERSION = 'v1.6 — 28/07/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtam5jdndqb2NtZGZmdHVnaHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzYzNjUsImV4cCI6MjA5NzE1MjM2NX0.00rkvqTc0dxJr5Ga8cnwwzLumD_nWWlxlaaYZHLDOGg';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
