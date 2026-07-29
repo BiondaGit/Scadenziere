@@ -82,8 +82,7 @@
       letter-spacing: 0.5px;
     }
 
-    input[type="email"],
-    input[type="password"] {
+    .field input {
       width: 100%;
       padding: 0.7rem 0.9rem;
       background: var(--bg);
@@ -104,6 +103,7 @@
       position: relative;
       display: flex;
       align-items: center;
+      width: 100%; /* <-- Aggiungi questa riga */
     }
     
     /* Padding a destra sull'input per non far sovrapporre il testo all'icona */
