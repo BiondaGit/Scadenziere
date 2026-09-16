@@ -659,7 +659,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.9c — 16/09/2026';
+const APP_VERSION = 'v1.9b — 16/09/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_PUBLISHABLE = 'sb_publishable_GytEH0SOWJm6H2m_KczVAA_2KFNUhzT'
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE);
@@ -667,7 +667,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE);
 let all=[], view=[], selectedId=null, mode='create', renewId=null;
 // let renewRiprendi=false;
 let activeRowId=null, originalEdit=null, _pastDateContinue=null;
-let =null, gruppoCorrente=null;
+let utenteCorrente=null, gruppoCorrente=null;
 
 async function avvia() {
   popolaDatalistRicerche(JSON.parse(localStorage.getItem('ricercheRecenti')||'[]'));
@@ -1319,26 +1319,26 @@ function applicaTema(tema) {
 
 // Aggiorna il tema in tempo reale se il sistema operativo cambia (solo se tema="sistema")
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-  if (utenteCorrente && .tema === 'sistema') {
+  if (utenteCorrente && utenteCorrente.tema === 'sistema') {
     applicaTema('sistema');
   }
 });
   
 // ── Impostazioni ──
 function openImpostazioni() {
-  if (!) return;
-  document.getElementById('settEmail').textContent = .email || '—';
-  document.getElementById('settNome').value = .nome || '';
+  if (!utenteCorrente) return;
+  document.getElementById('settEmail').textContent = utenteCorrente.email || '—';
+  document.getElementById('settNome').value = utenteCorrente.nome || '';
   document.getElementById('settGruppo').textContent = gruppoCorrente?.nome || '—';
-  const ua = .ultimo_accesso;
+  const ua = utenteCorrente.ultimo_accesso;
   document.getElementById('settUltimoAccesso').textContent = ua
     ? new Date(ua).toLocaleString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
     : '—';
-  const temaAttuale = .tema || 'scuro';
+  const temaAttuale = utenteCorrente.tema || 'scuro';
   document.querySelectorAll('.temaBtn').forEach(b => b.classList.toggle('active', b.dataset.tema === temaAttuale));
   document.getElementById('settPwd1').value = '';
   document.getElementById('settPwd2').value = '';
-  document.getElementById('settSezioneGruppo').style.display = .ruolo === 'admin' ? 'block' : 'none';
+  document.getElementById('settSezioneGruppo').style.display = utenteCorrente.ruolo === 'admin' ? 'block' : 'none';
   document.getElementById('settBackdrop').style.display = 'flex';
   document.getElementById('settBackdrop').setAttribute('aria-hidden', 'false');
 }
@@ -1365,7 +1365,7 @@ async function salvaImpostazioni() {
     // Aggiorna profilo su tabella utenti
     const { error: errProfilo } = await db.from('utenti')
       .update({ nome: nuovoNome, tema: temaSelezionato })
-      .eq('id', .id);
+      .eq('id', utenteCorrente.id);
     if (errProfilo) { showToast('Errore', traduciErrore(errProfilo.message)); document.getElementById('settSalva').disabled = false; return; }
 
     // Aggiorna password su Supabase Auth (solo se inserita)
@@ -1375,8 +1375,8 @@ async function salvaImpostazioni() {
     }
 
     // Aggiorna stato locale
-    .nome = nuovoNome;
-    .tema = temaSelezionato;
+    utenteCorrente.nome = nuovoNome;
+    utenteCorrente.tema = temaSelezionato;
     applicaTema(temaSelezionato);
 
     document.getElementById('settSalva').disabled = false;
@@ -1817,23 +1817,15 @@ async function creaPushSubscription() {
       c => c.charCodeAt(0)
     );
 
-    let subscription = await registration.pushManager.getSubscription();
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey
+    });
 
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey
-      });
-    }
-
-    const subscriptionJson = subscription.toJSON();
-
-    console.log('PUSH ENDPOINT:', subscriptionJson.endpoint);
-    console.log('PUSH P256DH:', subscriptionJson.keys?.p256dh);
-    console.log('PUSH AUTH:', subscriptionJson.keys?.auth);
+    console.log('PUSH SUBSCRIPTION CREATA:', subscription);
 
   } catch (error) {
-    console.error('Errore gestione Push Subscription:', error);
+    console.error('Errore creazione Push Subscription:', error);
   }
 }
 //F 16/9/26 Inserimento service worker per push up   
