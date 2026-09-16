@@ -1,12 +1,10 @@
-self.addEventListener('install', event => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
-
 self.addEventListener('push', event => {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage('PUSH_RICEVUTA');
+    });
+  });
+
   console.log('[SW] PUSH RICEVUTA');
 
   event.waitUntil(
