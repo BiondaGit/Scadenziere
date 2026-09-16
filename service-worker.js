@@ -8,24 +8,10 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('push', event => {
   console.log('[SW] PUSH RICEVUTA');
-  let dati = {
-    titolo: 'Scadenziere',
-    messaggio: 'Hai una nuova notifica.'
-  };
-
-  if (event.data) {
-    try {
-      dati = event.data.json();
-    } catch (e) {
-      dati.messaggio = event.data.text();
-    }
-  }
 
   event.waitUntil(
-    self.registration.showNotification(dati.titolo, {
-      body: dati.messaggio,
-      icon: '/Scadenziere/icons/icon-192.png',
-      badge: '/Scadenziere/icons/icon-192.png'
+    self.registration.showNotification('Scadenziere', {
+      body: 'Push ricevuta dal Service Worker'
     })
   );
 });
