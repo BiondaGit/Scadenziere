@@ -659,7 +659,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.9a — 16/09/2026';
+const APP_VERSION = 'v1.9b — 16/09/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_PUBLISHABLE = 'sb_publishable_GytEH0SOWJm6H2m_KczVAA_2KFNUhzT'
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE);
@@ -1799,6 +1799,34 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Scadenziere/service-worker.js')
     .then(() => console.log('Service Worker registrato'))
     .catch(error => console.error('Errore Service Worker:', error));
+}
+async function creaPushSubscription() {
+  try {
+    const registration = await navigator.serviceWorker.ready;
+
+    const publicKey =
+      'BOljqezE9pK4iEHXQEo85eebT5WaRLxLK8NbPP4Wgx25ctSEryHTNTC3zBeox3qN0KZOaKNGhZ5ni5BYCtOSH2U';
+
+    const applicationServerKey = Uint8Array.from(
+      atob(
+        publicKey
+          .replace(/-/g, '+')
+          .replace(/_/g, '/')
+          .padEnd(publicKey.length + (4 - publicKey.length % 4) % 4, '=')
+      ),
+      c => c.charCodeAt(0)
+    );
+
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey
+    });
+
+    console.log('PUSH SUBSCRIPTION CREATA:', subscription);
+
+  } catch (error) {
+    console.error('Errore creazione Push Subscription:', error);
+  }
 }
 //F 16/9/26 Inserimento service worker per push up   
       
