@@ -659,7 +659,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.9 — 16/09/2026';
+const APP_VERSION = 'v1.9a — 16/09/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_PUBLISHABLE = 'sb_publishable_GytEH0SOWJm6H2m_KczVAA_2KFNUhzT'
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE);
@@ -1794,7 +1794,14 @@ setInterval(async()=>{
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') verificaGruppoAttivo();
 });
-
+//I 16/9/26 Inserimento service worker per push up   
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Scadenziere/service-worker.js')
+    .then(() => console.log('Service Worker registrato'))
+    .catch(error => console.error('Errore Service Worker:', error));
+}
+//F 16/9/26 Inserimento service worker per push up   
+      
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',avvia);}else{avvia();}
 </script>
 </body>
