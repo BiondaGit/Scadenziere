@@ -659,7 +659,7 @@
 <datalist id="dlEmail"></datalist>
 
 <script>
-const APP_VERSION = 'v1.9b — 16/09/2026';
+const APP_VERSION = 'v1.9c — 16/09/2026';
 const SUPABASE_URL  = 'https://wmjncvwjocmdfftughtz.supabase.co';
 const SUPABASE_PUBLISHABLE = 'sb_publishable_GytEH0SOWJm6H2m_KczVAA_2KFNUhzT'
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE);
@@ -1817,15 +1817,23 @@ async function creaPushSubscription() {
       c => c.charCodeAt(0)
     );
 
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey
-    });
+    let subscription = await registration.pushManager.getSubscription();
 
-    console.log('PUSH SUBSCRIPTION CREATA:', subscription);
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey
+      });
+    }
+
+    const subscriptionJson = subscription.toJSON();
+
+    console.log('PUSH ENDPOINT:', subscriptionJson.endpoint);
+    console.log('PUSH P256DH:', subscriptionJson.keys?.p256dh);
+    console.log('PUSH AUTH:', subscriptionJson.keys?.auth);
 
   } catch (error) {
-    console.error('Errore creazione Push Subscription:', error);
+    console.error('Errore gestione Push Subscription:', error);
   }
 }
 //F 16/9/26 Inserimento service worker per push up   
