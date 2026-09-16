@@ -7,6 +7,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('push', event => {
+  console.log('[SW] PUSH RICEVUTA');
   let dati = {
     titolo: 'Scadenziere',
     messaggio: 'Hai una nuova notifica.'
